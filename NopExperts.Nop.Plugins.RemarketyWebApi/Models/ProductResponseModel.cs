@@ -9,7 +9,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
         public ProductResponseModel()
         {
             ProductCategories = new List<ProductCategoryModel>();
-            Image = new ImageModel();
             Images = new List<ImageModel>();
             Options = new List<OptionModel>();
             Variants = new List<ProductVariantModel>();
@@ -25,7 +24,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
         public int Id { get; set; }
 
         [JsonProperty(PropertyName = "published_at")]
-        public DateTime PublishedAt { get; set; }
+        public DateTime? PublishedAt { get; set; }
 
         [JsonProperty(PropertyName = "product_exists")]
         public bool ProductExists { get; set; }
@@ -85,10 +84,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
             public int ProductId { get; set; }
 
             [JsonProperty(PropertyName = "created_at")]
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
 
             [JsonProperty(PropertyName = "updated_at")]
-            public DateTime UpdatedAt { get; set; }
+            public DateTime? UpdatedAt { get; set; }
 
             [JsonProperty(PropertyName = "src")]
             public string Src { get; set; }
@@ -121,7 +120,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
             public string Currency { get; set; }
 
             [JsonProperty(PropertyName = "created_at")]
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
 
             [JsonProperty(PropertyName = "fulfillment_service")]
             public string FullfilmentService { get; set; }
@@ -160,7 +159,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
             public string Option3 { get; set; }
 
             [JsonProperty(PropertyName = "updated_at")]
-            public DateTime UpdatedAt { get; set; }
+            public DateTime? UpdatedAt { get; set; }
 
             [JsonProperty(PropertyName = "requires_shipping")]
             public bool RequiresShipping { get; set; }
