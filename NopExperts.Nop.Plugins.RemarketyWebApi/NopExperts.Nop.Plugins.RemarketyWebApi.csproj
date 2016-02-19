@@ -267,9 +267,11 @@
     <Compile Include="Infrastructure\Plugin.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
     <Compile Include="Models\CountResponseModel.cs" />
-    <Compile Include="Models\PagedRequestParameters.cs" />
+    <Compile Include="Models\CustomerResponseModel.cs" />
+    <Compile Include="Models\MultipleCustomerResponseModel.cs" />
     <Compile Include="Models\ProductResponseModel.cs" />
     <Compile Include="Models\MultipleProductResponseModel .cs" />
+    <Compile Include="Models\SingleCustomerResponseModel.cs" />
     <Compile Include="Models\SingleProductResponseModel.cs" />
     <Compile Include="Models\StoreSettingsResponseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

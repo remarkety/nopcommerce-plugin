@@ -12,12 +12,15 @@ using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
+using Nop.Services.Common;
 using Nop.Services.Customers;
+using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Seo;
 using Nop.Services.Vendors;
+using Nop.Web.Models.Blogs;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models;
 
 
@@ -36,6 +39,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly ICustomerService _customerService;
         private readonly IVendorService _vendorService;
         private readonly IPictureService _pictureService;
+        private readonly ILogger _logger;
+        private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -45,6 +50,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         public RemarketyWebApiController()
         {
+            _logger = EngineContext.Current.Resolve<ILogger>();
+            _newsLetterSubscriptionService = EngineContext.Current.Resolve<INewsLetterSubscriptionService>();
             _vendorService = EngineContext.Current.Resolve<IVendorService>();
             _pictureService = EngineContext.Current.Resolve<IPictureService>();
             _emailAccountService = EngineContext.Current.Resolve<IEmailAccountService>();
@@ -107,7 +114,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("products")]
-        public MultipleProductResponseModel Products(int page = 0, int limit = 100, [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue, [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
             var products = _productRepository.TableNoTracking;
 
@@ -129,11 +136,40 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         {
             var product = _productService.GetProductById(productId);
 
+            if (product == null)
+            {
+                _logger.Error($"RemarketyWebApi (products/{productId}): unknown productId ({productId})");
+
+                return new SingleProductResponseModel
+                {
+                    Product = null
+                };
+            }
+
             return new SingleProductResponseModel
             {
                 Product = PrepareProductResponseModel(product)
             };
         }
+
+        [HttpGet]
+        [Route("products/count")]
+        public CountResponseModel ProductsConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        {
+            var products = _productRepository.TableNoTracking;
+
+            var productsCount = updatedAt.HasValue
+                ? products.Count(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
+                : products.Count(x => !x.Deleted && x.Published);
+
+            return new CountResponseModel
+            {
+                Count = productsCount
+            };
+        }
+
+
+        #region util methods
 
         private ProductResponseModel PrepareProductResponseModel(Product product)
         {
@@ -246,25 +282,50 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        [HttpGet]
-        [Route("products/count")]
-        public CountResponseModel ProductsConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
-        {
-            var products = _productRepository.TableNoTracking;
-
-            var productsCount = updatedAt.HasValue
-                ? products.Count(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
-                : products.Count(x => !x.Deleted && x.Published);
-
-            return new CountResponseModel
-            {
-                Count = productsCount
-            };
-        }
+        #endregion
 
         #endregion
 
         #region /customers
+
+        [HttpGet]
+        [Route("customers")]
+        public MultipleCustomerResponseModel Customers(int page = 0, int limit = int.MaxValue, [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        {
+            var defaultRoles = new[]
+           {
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
+            };
+
+            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page, pageSize: limit);
+
+            return new MultipleCustomerResponseModel
+            {
+                Customers = customers.Select(PrepareCustomerResponseModel).ToList()
+            };
+        }
+
+        [HttpGet]
+        [Route("customers/{customerId:int}")]
+        public SingleCustomerResponseModel CustomerById(int customerId)
+        {
+            var customer = _customerService.GetCustomerById(customerId);
+
+            if (customer == null)
+            {
+                _logger.Error($"RemarketyWebApi (customers/{customerId}): unknown customerId ({customerId})");
+
+                return new SingleCustomerResponseModel
+                {
+                    Customer = null
+                };
+            }
+
+            return new SingleCustomerResponseModel
+            {
+                Customer = PrepareCustomerResponseModel(customer)
+            };
+        }
 
         [HttpGet]
         [Route("customers/count")]
@@ -282,6 +343,73 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Count = customers.Count
             };
         }
+
+        #region util methods
+
+        private CustomerResponseModel PrepareCustomerResponseModel(Customer customer)
+        {
+            var customerGroups = customer.CustomerRoles.Select(PrepareCustomerGroupModel).ToList();
+            var defaultAddress = PrepareCustomerAddressModel(customer);
+
+            var newsletterSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(customer.Email, _storeContext.CurrentStore.Id);
+
+            string birthDateString = null;
+            var birthDate = customer.GetAttribute<DateTime?>(SystemCustomerAttributeNames.DateOfBirth);
+
+            if (birthDate != null)
+            {
+                birthDateString = birthDate.Value.ToString("yy-MM-dd");
+            }
+
+            return new CustomerResponseModel
+            {
+                Id = customer.Id,
+                CreatedAt = customer.CreatedOnUtc,
+                UpdatedAt = customer.CreatedOnUtc,
+                Title = String.Empty,
+                Email = customer.Email,
+                Tags = new string[] { },
+                AcceptsMarketing = newsletterSubscription?.Active ?? false,
+                BirthDate = birthDateString,
+                DefaultAddress = defaultAddress,
+                FirstName = customer.GetAttribute<string>(SystemCustomerAttributeNames.FirstName),
+                Gender = customer.GetAttribute<string>(SystemCustomerAttributeNames.Gender),
+                Groups = customerGroups,
+                Info = new object(),
+                LastName = customer.GetAttribute<string>(SystemCustomerAttributeNames.LastName),
+                VerifiedEmail = null
+            };
+        }
+
+        private CustomerResponseModel.CustomerAddressModel PrepareCustomerAddressModel(Customer customer)
+        {
+            var defaultAddress = customer.ShippingAddress ?? customer.Addresses.FirstOrDefault();
+
+            if (defaultAddress == null)
+            {
+                return null;
+            }
+
+            return new CustomerResponseModel.CustomerAddressModel
+            {
+                Country = defaultAddress.Country?.Name,
+                Phone = defaultAddress.PhoneNumber,
+                Zip = defaultAddress.ZipPostalCode,
+                CountryCode = defaultAddress.Country?.ThreeLetterIsoCode,
+                ProvinceCode = defaultAddress.StateProvince?.Abbreviation
+            };
+        }
+
+        private CustomerResponseModel.GroupModel PrepareCustomerGroupModel(CustomerRole role)
+        {
+            return new CustomerResponseModel.GroupModel
+            {
+                Id = role.Id,
+                Name = role.Name
+            };
+        }
+
+        #endregion
 
         #endregion
 
