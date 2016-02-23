@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Cart
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Cart
 {
     public class SingleCartResponseModel
     {

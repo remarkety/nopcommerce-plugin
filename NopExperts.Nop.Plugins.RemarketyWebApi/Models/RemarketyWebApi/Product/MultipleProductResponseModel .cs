@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Product
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product
 {
     public class MultipleProductResponseModel
     {

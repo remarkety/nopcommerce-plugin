@@ -249,6 +249,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <Content Include="Views\RemarketyWebAdmin\Configure.cshtml" />
+    <Content Include="Views\Web.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -262,30 +264,33 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\RemarketyWebAdminController.cs" />
     <Compile Include="Controllers\RemarketyWebApiController.cs" />
     <Compile Include="Infrastructure\AuthorizationTokenRequiredAttribute.cs" />
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />
     <Compile Include="Infrastructure\Plugin.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
-    <Compile Include="Models\AddressModel.cs" />
-    <Compile Include="Models\Cart\CartResponseModel.cs" />
-    <Compile Include="Models\CountResponseModel.cs" />
-    <Compile Include="Models\Customer\CustomerResponseModel.cs" />
-    <Compile Include="Models\DiscountCodeModel.cs" />
-    <Compile Include="Models\LineItemModel.cs" />
-    <Compile Include="Models\Cart\MultipleCartResponseModel.cs" />
-    <Compile Include="Models\Customer\MultipleCustomerResponseModel.cs" />
-    <Compile Include="Models\Order\MultipleOrderResponseModel.cs" />
-    <Compile Include="Models\Order\OrderResponseModel.cs" />
-    <Compile Include="Models\Product\ProductResponseModel.cs" />
-    <Compile Include="Models\Product\MultipleProductResponseModel .cs" />
-    <Compile Include="Models\ShippingLineModel.cs" />
-    <Compile Include="Models\Cart\SingleCartResponseModel.cs" />
-    <Compile Include="Models\Customer\SingleCustomerResponseModel.cs" />
-    <Compile Include="Models\Order\SingleOrderResponseModel.cs" />
-    <Compile Include="Models\Product\SingleProductResponseModel.cs" />
-    <Compile Include="Models\Store\StoreSettingsResponseModel.cs" />
-    <Compile Include="Models\TaxLineModel.cs" />
+    <Compile Include="Infrastructure\StringHelper.cs" />
+    <Compile Include="Models\RemarketyWebAdmin\ConfigureModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\AddressModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Cart\CartResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\CountResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Customer\CustomerResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\DiscountCodeModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\LineItemModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Cart\MultipleCartResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Customer\MultipleCustomerResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Order\MultipleOrderResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Order\OrderResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Product\ProductResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Product\MultipleProductResponseModel .cs" />
+    <Compile Include="Models\RemarketyWebApi\ShippingLineModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Cart\SingleCartResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Customer\SingleCustomerResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Order\SingleOrderResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Product\SingleProductResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\Store\StoreSettingsResponseModel.cs" />
+    <Compile Include="Models\RemarketyWebApi\TaxLineModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

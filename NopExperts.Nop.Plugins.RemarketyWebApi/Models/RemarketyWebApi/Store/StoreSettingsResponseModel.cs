@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Store
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store
 {
     public class StoreSettingsResponseModel
     {

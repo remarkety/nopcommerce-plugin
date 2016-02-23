@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi
 {
 
     public class DiscountCodeModel

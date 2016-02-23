@@ -28,16 +28,16 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
             //        new[] { "NopExperts.Nop.Plugins.PopUpNewsletterPlugin.Controllers" }
             //    );
 
-            //    var route = routes.MapRoute("PopupAdminControllerRoutes",
-            //        "Admin/PopupNewsletterPlugin/{action}",
-            //        new { controller = "PopupAdmin", action = "Configure" },
-            //        new[] { "NopExperts.Nop.Plugins.PopUpNewsletterPlugin.Controllers" }
-            //    );
+            var route = routes.MapRoute("RemarketyWebAdmin",
+                "Admin/RemarketyWebAdmin/{action}",
+                new { controller = "RemarketyWebAdmin" },
+                new[] { "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" }
+            );
 
-            //    route.DataTokens.Add("area", "admin");
+            route.DataTokens.Add("area", "admin");
 
-            //    routes.Remove(route);
-            //    routes.Insert(0, route);
+            routes.Remove(route);
+            routes.Insert(0, route);
 
             GlobalConfiguration.Configure(x => x.MapHttpAttributeRoutes());
         }

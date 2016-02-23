@@ -1,0 +1,25 @@
+﻿@model NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin.ConfigureModel
+
+@{
+    Layout = "_AdminLayout.cshtml";
+    ViewBag.Title = "Crawler API plugin";
+}
+
+
+<div class="section-header">
+    <div class="title">
+        <img src="/Administration/Content/images/ico-configuration.png" alt="">
+        @ViewBag.Title
+    </div>
+</div>
+
+<div>
+    <table class="adminContent">
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.RemarketyWebApiKey):</td>
+            <td class="adminData">
+                @Html.DisplayTextFor(m => m.RemarketyWebApiKey)
+            </td>
+        </tr>
+    </table>
+</div>
