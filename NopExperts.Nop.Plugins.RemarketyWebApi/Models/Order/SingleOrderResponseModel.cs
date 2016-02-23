@@ -1,4 +1,4 @@
-﻿namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+﻿namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Order
 {
     public class SingleOrderResponseModel
     {

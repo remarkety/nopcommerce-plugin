@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Customer;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Cart
 {
     public class CartResponseModel
     {

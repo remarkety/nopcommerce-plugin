@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Customer
 {
     public class CustomerResponseModel
     {

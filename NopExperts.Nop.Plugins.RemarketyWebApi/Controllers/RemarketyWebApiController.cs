@@ -26,11 +26,18 @@ using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Tax;
 using Nop.Services.Vendors;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Cart;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Customer;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Order;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Product;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Store;
 
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 {
+    [AuthorizationTokenRequired]
     [RoutePrefix("RemarketyWebApi")]
     public class RemarketyWebApiController : ApiController
     {

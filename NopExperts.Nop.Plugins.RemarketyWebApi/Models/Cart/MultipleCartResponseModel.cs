@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Cart
 {
     public class MultipleCartResponseModel
     {

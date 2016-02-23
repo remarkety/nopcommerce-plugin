@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Nop.Core.Domain.Customers;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.Customer;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.Order
 {
     public class OrderResponseModel
     {
