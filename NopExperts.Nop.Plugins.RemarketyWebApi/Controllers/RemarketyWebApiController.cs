@@ -6,21 +6,26 @@ using System.Web.Http;
 using Nop.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Domain.Media;
+using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Shipping;
+using Nop.Core.Domain.Tax;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;
+using Nop.Services.Directory;
 using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Seo;
+using Nop.Services.Shipping;
+using Nop.Services.Tax;
 using Nop.Services.Vendors;
-using Nop.Web.Models.Blogs;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models;
 
 
@@ -41,15 +46,29 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IPictureService _pictureService;
         private readonly ILogger _logger;
         private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
+        private readonly IShoppingCartService _shoppingCartService;
+        private readonly IWorkContext _workContext;
+        private readonly ICurrencyService _currencyService;
+        private readonly IOrderTotalCalculationService _orderTotalCalculationService;
+        private readonly ITaxService _taxService;
+        private readonly IPriceCalculationService _priceCalculationService;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
+        private readonly TaxSettings _taxSettings;
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
 
         public RemarketyWebApiController()
         {
+            _currencyService = EngineContext.Current.Resolve<ICurrencyService>();
+            _priceCalculationService = EngineContext.Current.Resolve<IPriceCalculationService>();
+            _taxService = EngineContext.Current.Resolve<ITaxService>();
+            _taxSettings = EngineContext.Current.Resolve<TaxSettings>();
+            _orderTotalCalculationService = EngineContext.Current.Resolve<IOrderTotalCalculationService>();
+            _shoppingCartService = EngineContext.Current.Resolve<IShoppingCartService>();
+            _workContext = EngineContext.Current.Resolve<IWorkContext>();
             _logger = EngineContext.Current.Resolve<ILogger>();
             _newsLetterSubscriptionService = EngineContext.Current.Resolve<INewsLetterSubscriptionService>();
             _vendorService = EngineContext.Current.Resolve<IVendorService>();
@@ -114,7 +133,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("products")]
-        public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue, [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue,
+            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
             var products = _productRepository.TableNoTracking;
 
@@ -174,7 +194,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private ProductResponseModel PrepareProductResponseModel(Product product)
         {
             var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new { SeName = product.GetSeName() }));
-            var productVendor = _vendorService.GetVendorById(product.Id);
+            var productVendor = _vendorService.GetVendorById(product.VendorId);
 
             var defaultPicture = product.ProductPictures.FirstOrDefault();
 
@@ -235,7 +255,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private ProductResponseModel.OptionModel PrepareProductOptionsModel(ProductAttributeMapping productAttributeMapping)
+        private ProductResponseModel.OptionModel PrepareProductOptionsModel(
+            ProductAttributeMapping productAttributeMapping)
         {
             var values = productAttributeMapping.ProductAttributeValues.Select(x => x.Name).ToArray();
 
@@ -257,7 +278,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private ProductResponseModel.ProductVariantModel PrepareProductVariantModel(ProductAttributeCombination productAttributeCombination)
+        private ProductResponseModel.ProductVariantModel PrepareProductVariantModel(
+            ProductAttributeCombination productAttributeCombination)
         {
             var product = productAttributeCombination.Product;
 
@@ -277,7 +299,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Sku = productAttributeCombination.Sku,
                 Title = null,
                 UpdatedAt = null,
-                Taxable = product.IsTaxExempt,
+                Taxable = !product.IsTaxExempt,
                 Weight = product.Weight
             };
         }
@@ -290,14 +312,16 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("customers")]
-        public MultipleCustomerResponseModel Customers(int page = 0, int limit = int.MaxValue, [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public MultipleCustomerResponseModel Customers(int page = 0, int limit = int.MaxValue,
+            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
             var defaultRoles = new[]
-           {
+            {
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
             };
 
-            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page, pageSize: limit);
+            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
+                pageSize: limit);
 
             return new MultipleCustomerResponseModel
             {
@@ -348,10 +372,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private CustomerResponseModel PrepareCustomerResponseModel(Customer customer)
         {
+            var defaultAddress = customer.ShippingAddress ?? customer.Addresses.FirstOrDefault();
+            var defaultAddressModel = PrepareAddressModel(defaultAddress);
             var customerGroups = customer.CustomerRoles.Select(PrepareCustomerGroupModel).ToList();
-            var defaultAddress = PrepareCustomerAddressModel(customer);
 
-            var newsletterSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(customer.Email, _storeContext.CurrentStore.Id);
+            var newsletterSubscription =
+                _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(customer.Email,
+                    _storeContext.CurrentStore.Id);
 
             string birthDateString = null;
             var birthDate = customer.GetAttribute<DateTime?>(SystemCustomerAttributeNames.DateOfBirth);
@@ -371,7 +398,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Tags = new string[] { },
                 AcceptsMarketing = newsletterSubscription?.Active ?? false,
                 BirthDate = birthDateString,
-                DefaultAddress = defaultAddress,
+                DefaultAddress = defaultAddressModel,
                 FirstName = customer.GetAttribute<string>(SystemCustomerAttributeNames.FirstName),
                 Gender = customer.GetAttribute<string>(SystemCustomerAttributeNames.Gender),
                 Groups = customerGroups,
@@ -381,22 +408,20 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private CustomerResponseModel.CustomerAddressModel PrepareCustomerAddressModel(Customer customer)
+        private AddressModel PrepareAddressModel(Address address)
         {
-            var defaultAddress = customer.ShippingAddress ?? customer.Addresses.FirstOrDefault();
-
-            if (defaultAddress == null)
+            if (address == null)
             {
                 return null;
             }
 
-            return new CustomerResponseModel.CustomerAddressModel
+            return new AddressModel
             {
-                Country = defaultAddress.Country?.Name,
-                Phone = defaultAddress.PhoneNumber,
-                Zip = defaultAddress.ZipPostalCode,
-                CountryCode = defaultAddress.Country?.ThreeLetterIsoCode,
-                ProvinceCode = defaultAddress.StateProvince?.Abbreviation
+                Country = address.Country?.Name,
+                Phone = address.PhoneNumber,
+                Zip = address.ZipPostalCode,
+                CountryCode = address.Country?.ThreeLetterIsoCode,
+                ProvinceCode = address.StateProvince?.Abbreviation
             };
         }
 
@@ -416,6 +441,35 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         #region /orders
 
         [HttpGet]
+        [Route("orders/")]
+        public MultipleOrderResponseModel GetOrders(int page = 0, int limit = int.MaxValue,
+            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        {
+            var orders = _orderService
+                .SearchOrders(createdFromUtc: updatedAt, pageIndex: page, pageSize: limit)
+                .Select(PrepareOrderResponseModel)
+                .ToList();
+
+            return new MultipleOrderResponseModel
+            {
+                Orders = orders
+            };
+        }
+
+        [HttpGet]
+        [Route("orders/{orderId:int}")]
+        public SingleOrderResponseModel GetOrderById(int orderId)
+        {
+            var order = _orderService.GetOrderById(orderId);
+
+            return new SingleOrderResponseModel
+            {
+                Order = PrepareOrderResponseModel(order)
+            };
+        }
+
+
+        [HttpGet]
         [Route("orders/count")]
         public CountResponseModel OrdersConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
@@ -424,6 +478,253 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             return new CountResponseModel
             {
                 Count = ordersCount
+            };
+        }
+
+        #region utils
+
+        private OrderResponseModel PrepareOrderResponseModel(Order order)
+        {
+            var totalWeight = order.OrderItems.Sum(x => x.ItemWeight);
+            var totalLineItemsPrice = order.OrderItems.Sum(x => x.PriceInclTax);
+
+            var orderCustomerModel = PrepareCustomerResponseModel(order.Customer);
+            var discountCodes = order.DiscountUsageHistory.Select(PrepareDiscountCodeModel).ToList();
+            var lineItemsModel = order.OrderItems.Select(PrepareLineItemModel).ToList();
+            var taxLinesModel = order.TaxRatesDictionary.Select(PrepareTaxLineModel).ToList();
+
+            var orderStatusModel = new OrderResponseModel.StatusModel
+            {
+                Name = order.OrderStatus.ToString(),
+                Code = order.OrderStatusId.ToString()
+            };
+
+            var shippingLinesModel = new List<ShippingLineModel>
+            {
+                PrepareShippingLineModel(order)
+            };
+
+            return new OrderResponseModel
+            {
+                Id = order.Id,
+                CreatedAt = order.CreatedOnUtc,
+                Customer = orderCustomerModel,
+                UpdatedAt = order.CreatedOnUtc,
+                Currency = DEFAULT_CURRENSY,
+                Email = order.BillingAddress.Email,
+                DiscountCodes = discountCodes,
+                FulfillmentStatus = null,
+                LineItems = lineItemsModel,
+                Name = $"#{order.Id}",
+                Note = order.OrderNotes.FirstOrDefault(x => x.DisplayToCustomer)?.Note,
+                ShippingLines = shippingLinesModel,
+                Status = orderStatusModel,
+                SubtotalPrice = order.OrderSubtotalInclTax,
+                TaxLines = taxLinesModel,
+                TaxesIncluded = true,
+                Test = false,
+                TotalDiscounts = order.OrderSubTotalDiscountInclTax,
+                TotalLineItemsPrice = totalLineItemsPrice,
+                TotalPrice = order.OrderTotal,
+                TotalShipping = order.OrderShippingInclTax,
+                TotalTax = order.OrderTax,
+                TotalWeight = totalWeight
+            };
+        }
+
+        private TaxLineModel PrepareTaxLineModel(KeyValuePair<decimal, decimal> taxInfo)
+        {
+            return new TaxLineModel
+            {
+                Title = null,
+                Price = taxInfo.Value,
+                Rate = taxInfo.Key
+            };
+        }
+
+        private ShippingLineModel PrepareShippingLineModel(Order order)
+        {
+            return new ShippingLineModel
+            {
+                Title = order.ShippingMethod,
+                Code = order.ShippingMethod,
+                Price = order.OrderShippingInclTax
+            };
+        }
+
+        private DiscountCodeModel PrepareDiscountCodeModel(DiscountUsageHistory discountUsageHistory)
+        {
+            var discount = discountUsageHistory.Discount;
+
+            return new DiscountCodeModel
+            {
+                Code = discount.Id.ToString(),
+                Type = discount.UsePercentage ? "percentage" : "fixed_amount",
+                Amount = discount.DiscountAmount
+            };
+        }
+
+        private LineItemModel PrepareLineItemModel(OrderItem orderItem)
+        {
+            var product = orderItem.Product;
+            var productVendor = _vendorService.GetVendorById(product.VendorId);
+
+            return new LineItemModel
+            {
+                Name = product.Name,
+                Title = product.Name,
+                Sku = product.Sku,
+                ProductId = product.Id,
+                Vendor = productVendor?.Name,
+                TaxLines = null,
+                Price = orderItem.PriceInclTax,
+                Taxable = true,
+                Quantity = orderItem.Quantity,
+                VariantId = null,
+                VariantTitle = null
+            };
+        }
+
+        #endregion
+
+        #endregion
+
+        #region /carts
+
+        [HttpGet]
+        [Route("carts/")]
+        public MultipleCartResponseModel GetCarts(int page = 0, int limit = int.MaxValue,
+            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        {
+            var defaultRoles = new[]
+          {
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
+            };
+
+            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
+                pageSize: limit, loadOnlyWithShoppingCart: true);
+
+            return new MultipleCartResponseModel
+            {
+                Carts = customers.Select(PrepareCartResponseModel).ToList()
+            };
+        }
+
+        [HttpGet]
+        [Route("carts/{cartId:int}")]
+        public SingleCartResponseModel GetCartById(int cartId)
+        {
+            var customer = _customerService.GetCustomerById(cartId);
+
+            if (customer == null)
+            {
+                _logger.Error($"RemarketyWebApi (carts/{cartId}): unknown cartId ({cartId})");
+
+                return new SingleCartResponseModel
+                {
+                    Cart = null
+                };
+            }
+
+            return new SingleCartResponseModel
+            {
+                Cart = PrepareCartResponseModel(customer)
+            };
+        }
+
+        private CartResponseModel PrepareCartResponseModel(Customer customer)
+        {
+            var shoppingCartItems = customer.ShoppingCartItems.Where(x => x.ShoppingCartType == ShoppingCartType.ShoppingCart).ToList();
+
+            if (!shoppingCartItems.Any())
+            {
+                return null;
+            }
+
+            decimal orderSubTotalDiscountAmountBase;
+            Discount orderSubTotalAppliedDiscount;
+            decimal subTotalWithoutDiscountBase;
+            decimal subTotalWithDiscountBase;
+            var subTotalIncludingTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax && !_taxSettings.ForceTaxExclusionFromOrderSubtotal;
+            _orderTotalCalculationService.GetShoppingCartSubTotal(shoppingCartItems, subTotalIncludingTax,
+                out orderSubTotalDiscountAmountBase, out orderSubTotalAppliedDiscount,
+                out subTotalWithoutDiscountBase, out subTotalWithDiscountBase);
+            decimal subtotalBase = subTotalWithoutDiscountBase;
+            decimal subtotal = _currencyService.ConvertFromPrimaryStoreCurrency(subtotalBase, _workContext.WorkingCurrency);
+
+            var totalWeight = shoppingCartItems.Sum(x => x.Product.Weight);
+            var shoppingCartCreatedAt = shoppingCartItems.Min(x => x.CreatedOnUtc);
+            var shoppingCartUpdatedAt = shoppingCartItems.Max(x => x.UpdatedOnUtc);
+            var billingAddress = PrepareAddressModel(customer.BillingAddress);
+            var shippingAddress = PrepareAddressModel(customer.ShippingAddress);
+            var customerResponseModel = PrepareCustomerResponseModel(customer);
+            var lineItemsModel = shoppingCartItems.Select(PrepareLineItemModel).ToList();
+            List<DiscountCodeModel> discountCodes = new List<DiscountCodeModel>();
+
+            if (orderSubTotalAppliedDiscount != null)
+            {
+                discountCodes.Add(PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
+            }
+
+            return new CartResponseModel
+            {
+                Customer = customerResponseModel,
+                CreatedAt = shoppingCartCreatedAt,
+                Id = customer.Id,
+                UpdatedAt = shoppingCartUpdatedAt,
+                Currency = DEFAULT_CURRENSY,
+                Email = customer.Email,
+                TaxLines = new List<TaxLineModel>(),
+                BillingAddress = billingAddress,
+                ShippingAddress = shippingAddress,
+                Note = null,
+                TotalWeight = totalWeight,
+                TaxesIncluded = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax,
+                TotalDiscounts = orderSubTotalDiscountAmountBase,
+                TotalShipping = null,
+                DiscountCodes = discountCodes,
+                SubtotalPrice = subTotalWithoutDiscountBase,
+                ShippingLines = null,
+                FulfillmentStatus = null,
+                LineItems = lineItemsModel,
+                TotalLineItemsPrice = null,
+                AcceptsMarketing = customerResponseModel?.AcceptsMarketing ?? false,
+                TotalTax = null,
+                TotalPrice = subtotal,
+                AbandonedCheckoutUrl = null,
+                CartToken = Guid.NewGuid()
+            };
+        }
+
+        private LineItemModel PrepareLineItemModel(ShoppingCartItem shoppingCartItem)
+        {
+            var product = shoppingCartItem.Product;
+            var productVendor = _vendorService.GetVendorById(product.VendorId);
+
+            Discount scDiscount;
+            decimal shoppingCartItemDiscountBase;
+            decimal taxRate;
+            decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product, _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase, out scDiscount), out taxRate);
+            decimal shoppingCartItemSubTotalWithDiscount = _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase, _workContext.WorkingCurrency);
+
+            var taxLines = new List<TaxLineModel>
+            {
+                new TaxLineModel {Rate = taxRate}
+            };
+
+            return new LineItemModel
+            {
+                Name = product.Name,
+                Title = product.Name,
+                TaxLines = taxLines,
+                Sku = product.Sku,
+                Price = shoppingCartItemSubTotalWithDiscount,
+                ProductId = product.Id,
+                Vendor = productVendor?.Name,
+                Taxable = !product.IsTaxExempt,
+                Quantity = shoppingCartItem.Quantity,
+                VariantId = null,
+                VariantTitle = null
             };
         }
 

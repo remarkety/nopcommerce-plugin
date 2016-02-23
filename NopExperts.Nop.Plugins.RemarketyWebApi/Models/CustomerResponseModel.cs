@@ -49,7 +49,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
 
 
         [JsonProperty("default_address")]
-        public CustomerAddressModel DefaultAddress { get; set; }
+        public AddressModel DefaultAddress { get; set; }
 
         [JsonProperty("groups")]
         public IList<GroupModel> Groups { get; set; }
@@ -65,19 +65,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models
             public string Name { get; set; }
         }
 
-        public class CustomerAddressModel
-        {
-            [JsonProperty("country")]
-            public string Country { get; set; }
-            [JsonProperty("country_code")]
-            public string CountryCode { get; set; }
-            [JsonProperty("province_code")]
-            public string ProvinceCode { get; set; }
-            [JsonProperty("zip")]
-            public string Zip { get; set; }
-            [JsonProperty("phone")]
-            public string Phone { get; set; }
-        }
+
     }
 
 }

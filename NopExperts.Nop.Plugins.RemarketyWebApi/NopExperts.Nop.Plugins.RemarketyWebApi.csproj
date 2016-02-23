@@ -266,14 +266,25 @@
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />
     <Compile Include="Infrastructure\Plugin.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
+    <Compile Include="Models\AddressModel.cs" />
+    <Compile Include="Models\CartResponseModel.cs" />
     <Compile Include="Models\CountResponseModel.cs" />
     <Compile Include="Models\CustomerResponseModel.cs" />
+    <Compile Include="Models\DiscountCodeModel.cs" />
+    <Compile Include="Models\LineItemModel.cs" />
+    <Compile Include="Models\MultipleCartResponseModel.cs" />
     <Compile Include="Models\MultipleCustomerResponseModel.cs" />
+    <Compile Include="Models\MultipleOrderResponseModel.cs" />
+    <Compile Include="Models\OrderResponseModel.cs" />
     <Compile Include="Models\ProductResponseModel.cs" />
     <Compile Include="Models\MultipleProductResponseModel .cs" />
+    <Compile Include="Models\ShippingLineModel.cs" />
+    <Compile Include="Models\SingleCartResponseModel.cs" />
     <Compile Include="Models\SingleCustomerResponseModel.cs" />
+    <Compile Include="Models\SingleOrderResponseModel.cs" />
     <Compile Include="Models\SingleProductResponseModel.cs" />
     <Compile Include="Models\StoreSettingsResponseModel.cs" />
+    <Compile Include="Models\TaxLineModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
