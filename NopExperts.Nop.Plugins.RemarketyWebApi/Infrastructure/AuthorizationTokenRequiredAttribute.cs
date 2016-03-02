@@ -4,6 +4,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using Nop.Core;
+using Nop.Core.Infrastructure;
+using Nop.Services.Common;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
@@ -22,7 +25,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
                 authTokenValue = queryParameters[AUTH_TOKEN_KEY];
             }
 
-            var token = ConfigurationManager.AppSettings["AuthorizationToken"] ?? "123";
+            var storeContext = EngineContext.Current.Resolve<IStoreContext>();
+            var token = storeContext.CurrentStore.GetAttribute<string>(StringHelper.RemarketyApiKey);
 
             if (authTokenValue != token)
             {

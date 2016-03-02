@@ -67,9 +67,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
+        private readonly IProductAttributeParser _productAttributeParser;
 
         public RemarketyWebApiController()
         {
+            _productAttributeParser = EngineContext.Current.Resolve<IProductAttributeParser>();
             _currencyService = EngineContext.Current.Resolve<ICurrencyService>();
             _priceCalculationService = EngineContext.Current.Resolve<IPriceCalculationService>();
             _taxService = EngineContext.Current.Resolve<ITaxService>();
@@ -669,6 +671,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var lineItemsModel = shoppingCartItems.Select(PrepareLineItemModel).ToList();
             List<DiscountCodeModel> discountCodes = new List<DiscountCodeModel>();
 
+            var cartUrl = Url.Link("RemoteCheckout", new { products = String.Join(",", shoppingCartItems.Select(x => x.Product.FormatSku(x.AttributesXml, _productAttributeParser))) });
+
+
             if (orderSubTotalAppliedDiscount != null)
             {
                 discountCodes.Add(PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
@@ -699,7 +704,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 AcceptsMarketing = customerResponseModel?.AcceptsMarketing ?? false,
                 TotalTax = null,
                 TotalPrice = subtotal,
-                AbandonedCheckoutUrl = null,
+                AbandonedCheckoutUrl = cartUrl,
                 CartToken = Guid.NewGuid()
             };
         }
@@ -720,12 +725,14 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 new TaxLineModel {Rate = taxRate}
             };
 
+            var sku = shoppingCartItem.Product.FormatSku(shoppingCartItem.AttributesXml, _productAttributeParser);
+
             return new LineItemModel
             {
                 Name = product.Name,
                 Title = product.Name,
                 TaxLines = taxLines,
-                Sku = product.Sku,
+                Sku = sku,
                 Price = shoppingCartItemSubTotalWithDiscount,
                 ProductId = product.Id,
                 Vendor = productVendor?.Name,

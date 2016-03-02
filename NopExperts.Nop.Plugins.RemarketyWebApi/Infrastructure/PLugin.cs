@@ -27,6 +27,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey", "Remarkety WebApi Key");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey.Hint", "Remarkety WebApi Key");
+
+            base.Install();
         }
 
         public void ManageSiteMap(SiteMapNode rootNode)
