@@ -1,8 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
@@ -18,6 +26,7 @@ using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
+using Nop.Services.Helpers;
 using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
@@ -60,6 +69,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IOrderTotalCalculationService _orderTotalCalculationService;
         private readonly ITaxService _taxService;
         private readonly IPriceCalculationService _priceCalculationService;
+        private readonly IDateTimeHelper _dateTimeHelper;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -71,6 +81,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         public RemarketyWebApiController()
         {
+            _dateTimeHelper = EngineContext.Current.Resolve<IDateTimeHelper>();
             _productAttributeParser = EngineContext.Current.Resolve<IProductAttributeParser>();
             _currencyService = EngineContext.Current.Resolve<ICurrencyService>();
             _priceCalculationService = EngineContext.Current.Resolve<IPriceCalculationService>();
@@ -101,11 +112,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var store = _storeContext.CurrentStore;
             var emailAccount = _emailAccountService.GetEmailAccountById(_emailAccountSettings.DefaultEmailAccountId);
 
-            var enumList = Enum.GetValues(typeof(OrderStatus))
+            var enumList = Enum.GetValues(typeof (OrderStatus))
                 .Cast<OrderStatus>()
                 .Select(x => new StoreSettingsResponseModel.OrderStatusModel
                 {
-                    Code = ((int)x).ToString(),
+                    Code = ((int) x).ToString(),
                     Name = x.ToString()
                 });
 
@@ -203,7 +214,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private ProductResponseModel PrepareProductResponseModel(Product product)
         {
-            var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new { SeName = product.GetSeName() }));
+            var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new {SeName = product.GetSeName()}));
             var productVendor = _vendorService.GetVendorById(product.VendorId);
 
             var defaultPicture = product.ProductPictures.FirstOrDefault();
@@ -405,7 +416,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 UpdatedAt = customer.CreatedOnUtc,
                 Title = String.Empty,
                 Email = customer.Email,
-                Tags = new string[] { },
+                Tags = new string[] {},
                 AcceptsMarketing = newsletterSubscription?.Active ?? false,
                 BirthDate = birthDateString,
                 DefaultAddress = defaultAddressModel,
@@ -607,7 +618,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
             var defaultRoles = new[]
-          {
+            {
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
             };
 
@@ -644,7 +655,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private CartResponseModel PrepareCartResponseModel(Customer customer)
         {
-            var shoppingCartItems = customer.ShoppingCartItems.Where(x => x.ShoppingCartType == ShoppingCartType.ShoppingCart).ToList();
+            var shoppingCartItems =
+                customer.ShoppingCartItems.Where(x => x.ShoppingCartType == ShoppingCartType.ShoppingCart).ToList();
 
             if (!shoppingCartItems.Any())
             {
@@ -655,12 +667,14 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             Discount orderSubTotalAppliedDiscount;
             decimal subTotalWithoutDiscountBase;
             decimal subTotalWithDiscountBase;
-            var subTotalIncludingTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax && !_taxSettings.ForceTaxExclusionFromOrderSubtotal;
+            var subTotalIncludingTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax &&
+                                       !_taxSettings.ForceTaxExclusionFromOrderSubtotal;
             _orderTotalCalculationService.GetShoppingCartSubTotal(shoppingCartItems, subTotalIncludingTax,
                 out orderSubTotalDiscountAmountBase, out orderSubTotalAppliedDiscount,
                 out subTotalWithoutDiscountBase, out subTotalWithDiscountBase);
             decimal subtotalBase = subTotalWithoutDiscountBase;
-            decimal subtotal = _currencyService.ConvertFromPrimaryStoreCurrency(subtotalBase, _workContext.WorkingCurrency);
+            decimal subtotal = _currencyService.ConvertFromPrimaryStoreCurrency(subtotalBase,
+                _workContext.WorkingCurrency);
 
             var totalWeight = shoppingCartItems.Sum(x => x.Product.Weight);
             var shoppingCartCreatedAt = shoppingCartItems.Min(x => x.CreatedOnUtc);
@@ -671,12 +685,19 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var lineItemsModel = shoppingCartItems.Select(PrepareLineItemModel).ToList();
             List<DiscountCodeModel> discountCodes = new List<DiscountCodeModel>();
 
-            var cartUrl = Url.Link("RemoteCheckout", new { products = String.Join(",", shoppingCartItems.Select(x => x.Product.FormatSku(x.AttributesXml, _productAttributeParser))) });
+            var cartUrl = Url.Link("RemoteCheckout",
+                new
+                {
+                    products =
+                        String.Join(",",
+                            shoppingCartItems.Select(x => x.Product.FormatSku(x.AttributesXml, _productAttributeParser)))
+                });
 
 
             if (orderSubTotalAppliedDiscount != null)
             {
-                discountCodes.Add(PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
+                discountCodes.Add(
+                    PrepareDiscountCodeModel(new DiscountUsageHistory {Discount = orderSubTotalAppliedDiscount}));
             }
 
             return new CartResponseModel
@@ -717,8 +738,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             Discount scDiscount;
             decimal shoppingCartItemDiscountBase;
             decimal taxRate;
-            decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product, _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase, out scDiscount), out taxRate);
-            decimal shoppingCartItemSubTotalWithDiscount = _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase, _workContext.WorkingCurrency);
+            decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product,
+                _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase,
+                    out scDiscount), out taxRate);
+            decimal shoppingCartItemSubTotalWithDiscount =
+                _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase,
+                    _workContext.WorkingCurrency);
 
             var taxLines = new List<TaxLineModel>
             {
@@ -745,4 +770,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         #endregion
     }
+
+
+
 }

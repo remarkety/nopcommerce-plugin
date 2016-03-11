@@ -266,8 +266,10 @@
   <ItemGroup>
     <Compile Include="Controllers\RemarketyWebAdminController.cs" />
     <Compile Include="Controllers\RemarketyWebApiController.cs" />
+    <Compile Include="Infrastructure\ApplicationConfiguration.cs" />
     <Compile Include="Infrastructure\AuthorizationTokenRequiredAttribute.cs" />
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />
+    <Compile Include="Infrastructure\ISO8601DateTimeConverter.cs" />
     <Compile Include="Infrastructure\Plugin.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
     <Compile Include="Infrastructure\StringHelper.cs" />
