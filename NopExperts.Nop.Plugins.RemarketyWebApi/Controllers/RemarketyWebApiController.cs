@@ -7,9 +7,11 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Data;
@@ -35,6 +37,7 @@ using Nop.Services.Seo;
 using Nop.Services.Shipping;
 using Nop.Services.Tax;
 using Nop.Services.Vendors;
+using Nop.Web.Framework.Themes;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi;
@@ -119,15 +122,17 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Code = ((int) x).ToString(),
                     Name = x.ToString()
                 });
+            
+            var logoPath = "Themes/ChildThemeUteam/Content/img/logo.png";
 
-            // TODO: add fields to settings
             return new StoreSettingsResponseModel
             {
                 StoreFrontUrl = store.Url,
                 Name = store.Name,
-                Timezone = "Israel",
+                Timezone = "Asia/Jerusalem",
                 Currency = DEFAULT_CURRENSY,
-                //LogoUrl = "",
+                Locale = "he_IL",
+                LogoUrl = _storeContext.CurrentStore.Url + logoPath,
                 ContactInfo = new StoreSettingsResponseModel.ContactInfoModel
                 {
                     Name = store.CompanyName,
@@ -532,7 +537,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Customer = orderCustomerModel,
                 UpdatedAt = order.CreatedOnUtc,
                 Currency = DEFAULT_CURRENSY,
-                Email = order.BillingAddress.Email,
+                Email = order.BillingAddress.Email ?? order.ShippingAddress.Email ?? order.Customer.Email,
                 DiscountCodes = discountCodes,
                 FulfillmentStatus = null,
                 LineItems = lineItemsModel,

@@ -24,7 +24,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order
         [JsonProperty("customer")]
         public CustomerResponseModel Customer { get; set; }
 
-        [JsonProperty("dicsount_codes")]
+        [JsonProperty("discount_codes")]
         public List<DiscountCodeModel> DiscountCodes { get; set; }
 
         [JsonProperty("email")]
