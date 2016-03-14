@@ -511,51 +511,67 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private OrderResponseModel PrepareOrderResponseModel(Order order)
         {
-            var totalWeight = order.OrderItems.Sum(x => x.ItemWeight);
-            var totalLineItemsPrice = order.OrderItems.Sum(x => x.PriceInclTax);
-
-            var orderCustomerModel = PrepareCustomerResponseModel(order.Customer);
-            var discountCodes = order.DiscountUsageHistory.Select(PrepareDiscountCodeModel).ToList();
-            var lineItemsModel = order.OrderItems.Select(PrepareLineItemModel).ToList();
-            var taxLinesModel = order.TaxRatesDictionary.Select(PrepareTaxLineModel).ToList();
-
-            var orderStatusModel = new OrderResponseModel.StatusModel
+            try
             {
-                Name = order.OrderStatus.ToString(),
-                Code = order.OrderStatusId.ToString()
-            };
 
-            var shippingLinesModel = new List<ShippingLineModel>
-            {
-                PrepareShippingLineModel(order)
-            };
+                var totalWeight = order.OrderItems.Sum(x => x.ItemWeight);
+                var totalLineItemsPrice = order.OrderItems.Sum(x => x.PriceInclTax);
 
-            return new OrderResponseModel
+                var orderCustomerModel = PrepareCustomerResponseModel(order.Customer);
+                var discountCodes = order.DiscountUsageHistory.Select(PrepareDiscountCodeModel).ToList();
+                var lineItemsModel = order.OrderItems.Select(PrepareLineItemModel).ToList();
+                var taxLinesModel = order.TaxRatesDictionary.Select(PrepareTaxLineModel).ToList();
+
+                var orderStatusModel = new OrderResponseModel.StatusModel
+                {
+                    Name = order.OrderStatus.ToString(),
+                    Code = order.OrderStatusId.ToString()
+                };
+
+                var shippingLinesModel = new List<ShippingLineModel>
+                {
+                    PrepareShippingLineModel(order)
+                };
+
+                if (String.IsNullOrEmpty(orderCustomerModel.Email))
+                {
+                    orderCustomerModel.Email = order.BillingAddress.Email ?? order.ShippingAddress.Email;
+                }
+
+                return new OrderResponseModel
+                {
+                    Id = order.Id,
+                    CreatedAt = order.CreatedOnUtc,
+                    Customer = orderCustomerModel,
+                    UpdatedAt = order.CreatedOnUtc,
+                    Currency = DEFAULT_CURRENSY,
+                    Email = order.BillingAddress.Email ?? order.ShippingAddress.Email ?? order.Customer.Email,
+                    DiscountCodes = discountCodes,
+                    FulfillmentStatus = null,
+                    LineItems = lineItemsModel,
+                    Name = $"#{order.Id}",
+                    Note = order.OrderNotes.FirstOrDefault(x => x.DisplayToCustomer)?.Note,
+                    ShippingLines = shippingLinesModel,
+                    Status = orderStatusModel,
+                    SubtotalPrice = order.OrderSubtotalInclTax,
+                    TaxLines = taxLinesModel,
+                    TaxesIncluded = true,
+                    Test = false,
+                    TotalDiscounts = order.OrderSubTotalDiscountInclTax,
+                    TotalLineItemsPrice = totalLineItemsPrice,
+                    TotalPrice = order.OrderTotal,
+                    TotalShipping = order.OrderShippingInclTax,
+                    TotalTax = order.OrderTax,
+                    TotalWeight = totalWeight
+                };
+
+            }
+            catch (Exception ex)
             {
-                Id = order.Id,
-                CreatedAt = order.CreatedOnUtc,
-                Customer = orderCustomerModel,
-                UpdatedAt = order.CreatedOnUtc,
-                Currency = DEFAULT_CURRENSY,
-                Email = order.BillingAddress.Email ?? order.ShippingAddress.Email ?? order.Customer.Email,
-                DiscountCodes = discountCodes,
-                FulfillmentStatus = null,
-                LineItems = lineItemsModel,
-                Name = $"#{order.Id}",
-                Note = order.OrderNotes.FirstOrDefault(x => x.DisplayToCustomer)?.Note,
-                ShippingLines = shippingLinesModel,
-                Status = orderStatusModel,
-                SubtotalPrice = order.OrderSubtotalInclTax,
-                TaxLines = taxLinesModel,
-                TaxesIncluded = true,
-                Test = false,
-                TotalDiscounts = order.OrderSubTotalDiscountInclTax,
-                TotalLineItemsPrice = totalLineItemsPrice,
-                TotalPrice = order.OrderTotal,
-                TotalShipping = order.OrderShippingInclTax,
-                TotalTax = order.OrderTax,
-                TotalWeight = totalWeight
-            };
+                _logger.Error($"RemarketyWebApi, orders/(id): {order?.Id}, {ex.Message} ", ex);
+
+                throw;
+            }
         }
 
         private TaxLineModel PrepareTaxLineModel(KeyValuePair<decimal, decimal> taxInfo)
