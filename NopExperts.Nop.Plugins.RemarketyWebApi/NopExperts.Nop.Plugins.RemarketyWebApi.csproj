@@ -251,6 +251,8 @@
     <Content Include="packages.config" />
     <Content Include="Views\RemarketyWebAdmin\Configure.cshtml" />
     <Content Include="Views\Web.config" />
+    <Content Include="Views\RemarketyWidget\GetStoreRemarketyWebTracking.cshtml" />
+    <Content Include="Views\RemarketyWidget\GetProductDetailsRemarketyWebTracking.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -266,6 +268,7 @@
   <ItemGroup>
     <Compile Include="Controllers\RemarketyWebAdminController.cs" />
     <Compile Include="Controllers\RemarketyWebApiController.cs" />
+    <Compile Include="Controllers\RemarketyWidgetController.cs" />
     <Compile Include="Infrastructure\ApplicationConfiguration.cs" />
     <Compile Include="Infrastructure\AuthorizationTokenRequiredAttribute.cs" />
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />

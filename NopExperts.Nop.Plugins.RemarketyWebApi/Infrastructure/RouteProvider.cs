@@ -24,6 +24,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
             routes.Remove(route);
             routes.Insert(0, route);
+
+            routes.MapRoute("RemarketyWidget",
+               "RemarketyWidget/{action}",
+               new { controller = "RemarketyWidget" },
+               new[] { "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" }
+           );
         }
     }
 }

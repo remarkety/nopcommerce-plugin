@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Web.Routing;
 using Nop.Core;
 using Nop.Core.Plugins;
+using Nop.Services.Cms;
 using Nop.Services.Common;
 using Nop.Services.Localization;
 using Nop.Web.Framework.Menu;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
-    public class Plugin : BasePlugin, IAdminMenuPlugin
+    public class Plugin : BasePlugin, IAdminMenuPlugin, IWidgetPlugin
     {
         private readonly IStoreContext _storeContext;
         private readonly IGenericAttributeService _genericAttributeService;
@@ -60,6 +63,45 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
             }
 
             nopExpertsNode.ChildNodes.Add(configNode);
+        }
+
+        public IList<string> GetWidgetZones()
+        {
+            return new List<string> { "productdetails_bottom", "body_end_html_tag_before" };
+        }
+
+        public void GetConfigurationRoute(out string actionName, out string controllerName, out RouteValueDictionary routeValues)
+        {
+            actionName = String.Empty;
+            controllerName = String.Empty;
+            routeValues = new RouteValueDictionary { { "Namespaces", "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" }, { "area", "Admin" } };
+        }
+
+        public void GetDisplayWidgetRoute(string widgetZone, out string actionName, out string controllerName, out RouteValueDictionary routeValues)
+        {
+            routeValues = new RouteValueDictionary {
+                { "Namespaces", "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" },
+                { "area", null } ,
+                {"widgetZone", widgetZone}
+            };
+
+            actionName = String.Empty;
+            controllerName = "RemarketyWidget";
+
+            switch (widgetZone)
+            {
+                case "productdetails_bottom":
+                    {
+                        actionName = "GetProductDetailsRemarketyWebTracking";
+                        break;
+                    }
+                case "body_end_html_tag_before":
+                    {
+                        actionName = "GetStoreRemarketyWebTracking";
+                        break;
+                    }
+            }
+
         }
     }
 }
