@@ -334,10 +334,10 @@
   <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy "$(ProjectDir)\" "D:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
-robocopy "$(ProjectDir)bin" "D:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
-robocopy "$(ProjectDir)bin" "D:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
-robocopy "$(ProjectDir)Views" "D:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
+    <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
+robocopy "$(ProjectDir)bin" "C:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
+robocopy "$(ProjectDir)bin" "C:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
+robocopy "$(ProjectDir)Views" "C:\Projects\Drugstore\Drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -488,6 +488,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         {
             var order = _orderService.GetOrderById(orderId);
 
+            if (order == null)
+            {
+                _logger.Error($"RemarketyAPI: orders/{orderId} - missing order data (orderId: {orderId})");
+                return null;
+            }
+
             return new SingleOrderResponseModel
             {
                 Order = PrepareOrderResponseModel(order)
@@ -513,7 +519,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         {
             try
             {
-
                 var totalWeight = order.OrderItems.Sum(x => x.ItemWeight);
                 var totalLineItemsPrice = order.OrderItems.Sum(x => x.PriceInclTax);
 
@@ -536,6 +541,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 if (String.IsNullOrEmpty(orderCustomerModel.Email))
                 {
                     orderCustomerModel.Email = order.BillingAddress.Email ?? order.ShippingAddress.Email;
+
+                    var newsletterSubscription = _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreId(orderCustomerModel.Email,
+                               _storeContext.CurrentStore.Id);
+
+                    orderCustomerModel.AcceptsMarketing = newsletterSubscription?.Active ?? false;
                 }
 
                 return new OrderResponseModel
