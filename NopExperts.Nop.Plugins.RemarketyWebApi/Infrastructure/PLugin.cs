@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Routing;
 using Nop.Core;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Plugins;
 using Nop.Services.Cms;
 using Nop.Services.Common;
@@ -13,13 +14,15 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
     public class Plugin : BasePlugin, IAdminMenuPlugin, IWidgetPlugin
     {
+        private readonly IWorkContext _workContext;
         private readonly IStoreContext _storeContext;
         private readonly IGenericAttributeService _genericAttributeService;
 
-        public Plugin(IStoreContext storeContext, IGenericAttributeService genericAttributeService)
+        public Plugin(IStoreContext storeContext, IGenericAttributeService genericAttributeService, IWorkContext workContext)
         {
             _storeContext = storeContext;
             _genericAttributeService = genericAttributeService;
+            _workContext = workContext;
         }
 
         public override void Install()
@@ -36,6 +39,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
         public void ManageSiteMap(SiteMapNode rootNode)
         {
+            if (!_workContext.CurrentCustomer.IsAdmin())
+                return;
+
             var configNode = new SiteMapNode
             {
                 Title = "RemarketyWebApi plugin",
