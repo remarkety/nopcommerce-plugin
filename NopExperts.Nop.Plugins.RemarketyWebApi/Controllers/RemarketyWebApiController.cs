@@ -18,6 +18,7 @@ using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
+using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Orders;
@@ -29,6 +30,7 @@ using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Helpers;
+using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Messages;
@@ -46,6 +48,7 @@ using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Customer;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Settings;
 
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
@@ -54,7 +57,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
     [RoutePrefix("RemarketyWebApi")]
     public class RemarketyWebApiController : ApiController
     {
-        private const string DEFAULT_CURRENSY = "ILS";
+        private const string DEFAULT_CURRENSY = "USD";
+        private const string DEFAULT_LOCALE = "en_US";
 
         // services
         private readonly IStoreContext _storeContext;
@@ -73,17 +77,24 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly ITaxService _taxService;
         private readonly IPriceCalculationService _priceCalculationService;
         private readonly IDateTimeHelper _dateTimeHelper;
+        private readonly IThemeContext _themeContext;
+        private readonly ILanguageService _languageService;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
         private readonly TaxSettings _taxSettings;
-
+        private readonly CurrencySettings _currencySettings;
+        private readonly RemarketyApiSettings _remarketyApiSettings;
+        private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
+             
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
         private readonly IProductAttributeParser _productAttributeParser;
 
         public RemarketyWebApiController()
         {
+            _languageService = EngineContext.Current.Resolve<ILanguageService>();
+            _themeContext = EngineContext.Current.Resolve<IThemeContext>();
             _dateTimeHelper = EngineContext.Current.Resolve<IDateTimeHelper>();
             _productAttributeParser = EngineContext.Current.Resolve<IProductAttributeParser>();
             _currencyService = EngineContext.Current.Resolve<ICurrencyService>();
@@ -104,6 +115,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _productService = EngineContext.Current.Resolve<IProductService>();
             _orderService = EngineContext.Current.Resolve<IOrderService>();
             _customerService = EngineContext.Current.Resolve<ICustomerService>();
+            _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
+            _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
+            _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
         }
 
         #region /store
@@ -123,16 +137,18 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Name = x.ToString()
                 });
             
-            var logoPath = "Themes/ChildThemeUteam/Content/img/logo.png";
+            var logoPath = _pictureService.GetPictureUrl(_remarketyApiSettings.StoreLogoPictureId);
+            var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
+            var orimaryStoreCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
 
             return new StoreSettingsResponseModel
             {
                 StoreFrontUrl = store.Url,
                 Name = store.Name,
-                Timezone = "Asia/Jerusalem",
-                Currency = DEFAULT_CURRENSY,
-                Locale = "he_IL",
-                LogoUrl = _storeContext.CurrentStore.Url + logoPath,
+                Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
+                Currency = orimaryStoreCurrency.CurrencyCode ?? DEFAULT_CURRENSY,
+                Locale = locale?.Replace('-', '_') ?? DEFAULT_LOCALE,
+                LogoUrl = logoPath,
                 ContactInfo = new StoreSettingsResponseModel.ContactInfoModel
                 {
                     Name = store.CompanyName,
@@ -141,12 +157,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 },
                 Address = new StoreSettingsResponseModel.AddressModel
                 {
-                    //Address1 = "",
-                    //Address2 = "",
-                    City = "",
-                    Country = "Israel",
-                    //State = "",
-                    //Zip = ""
+                    Address1 = _remarketyStoreAddressSettings.Address1,
+                    Address2 = _remarketyStoreAddressSettings.Address2,
+                    City = _remarketyStoreAddressSettings.City,
+                    Country = _remarketyStoreAddressSettings.Country,
+                    State = _remarketyStoreAddressSettings.State,
+                    Zip = _remarketyStoreAddressSettings.Zip
                 },
                 OrderStatuses = enumList.ToList()
             };
@@ -801,7 +817,4 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         #endregion
     }
-
-
-
 }

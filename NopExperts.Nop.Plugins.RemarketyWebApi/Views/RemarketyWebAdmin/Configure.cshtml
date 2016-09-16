@@ -1,19 +1,105 @@
-﻿@model NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin.ConfigureModel
+﻿@model NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin.RemarketyConfigModel
 
 @{
     Layout = "_AdminLayout.cshtml";
-    ViewBag.Title = "Crawler API plugin";
+    ViewBag.Title = "Remarkety WebAPI plugin";
+}
+
+<script>
+    $(document).ready(function () {
+        $("#remarkety-config").kendoTabStrip({
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                }
+            },
+            select: tabstrip_on_tab_select
+        });
+    });
+</script>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="section-header">
+        <div class="title">
+            <img src="/Administration/Content/images/ico-configuration.png" alt="">
+            @ViewBag.Title
+        </div>
+        <div class="options">
+            <input type="submit" value="@T("Admin.Common.Save")" class="k-button" />
+        </div>
+    </div>
+
+    <div id="remarkety-config">
+        <ul>
+            <li @Html.RenderSelectedTabIndex(0, GetSelectedTabIndex())>API Configuration</li>
+            <li @Html.RenderSelectedTabIndex(1, GetSelectedTabIndex())>Store address</li>
+            <li @Html.RenderSelectedTabIndex(2, GetSelectedTabIndex())>Remarkety WebAPI info</li>
+        </ul>
+        <div>
+            @ApiConfig()
+        </div>
+        <div>
+            @StoreAddressConfig()
+        </div>
+        <div>
+           @ApiInfo()
+        </div>
+    </div>
+
+    @*save selected tab index*@
+    <input type="hidden" id="selected-tab-index" name="selected-tab-index" value="@(GetSelectedTabIndex())">
+
 }
 
 
-<div class="section-header">
-    <div class="title">
-        <img src="/Administration/Content/images/ico-configuration.png" alt="">
-        @ViewBag.Title
-    </div>
-</div>
+@helper ApiConfig()
+{
+    <table class="adminContent">
+        <tr>
+            <td colspan="2">
+                Please, contact Remarkety to get your StoreID. 
+                <br/>
+                <br/>
+                Available TimeZone <a target="blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">list</a> (TZ* column)
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <br />
+            </td>
+        </tr><tr>
+            <td colspan="2">
+                <hr>
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.ApiConfigModel.RemarketyStoreId):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.ApiConfigModel.RemarketyStoreId)
+                @Html.ValidationMessageFor(m => m.ApiConfigModel.RemarketyStoreId)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.ApiConfigModel.TimeZone):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.ApiConfigModel.TimeZone)
+                @Html.ValidationMessageFor(m => m.ApiConfigModel.TimeZone)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.ApiConfigModel.StoreLogoPictureId):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.ApiConfigModel.StoreLogoPictureId)
+                @Html.ValidationMessageFor(m => m.ApiConfigModel.StoreLogoPictureId)
+            </td>
+        </tr>
+    </table>
+}
 
-<div>
+@helper ApiInfo()
+{
     <table class="adminContent">
         <tr>
             <td class="adminTitle">@Html.NopLabelFor(m => m.RemarketyWebApiKey):</td>
@@ -22,4 +108,46 @@
             </td>
         </tr>
     </table>
-</div>
+}
+
+@helper StoreAddressConfig()
+{
+    <table class="adminContent">
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.Country):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.Country)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.State):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.State)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.City):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.City)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.Address1):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.Address1)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.Address2):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.Address2)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.Zip):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.StoreAddressModel.Zip)
+            </td>
+        </tr>
+    </table>
+}
