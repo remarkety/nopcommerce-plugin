@@ -270,9 +270,10 @@
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />
     <Compile Include="Infrastructure\ISO8601DateTimeConverter.cs" />
     <Compile Include="Infrastructure\Plugin.cs" />
+    <Compile Include="Settings\RemarketyApiSettings.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
     <Compile Include="Infrastructure\StringHelper.cs" />
-    <Compile Include="Models\RemarketyWebAdmin\ConfigureModel.cs" />
+    <Compile Include="Models\RemarketyWebAdmin\RemarketyConfigModel.cs" />
     <Compile Include="Models\RemarketyWebApi\AddressModel.cs" />
     <Compile Include="Models\RemarketyWebApi\Cart\CartResponseModel.cs" />
     <Compile Include="Models\RemarketyWebApi\CountResponseModel.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="Models\RemarketyWebApi\Store\StoreSettingsResponseModel.cs" />
     <Compile Include="Models\RemarketyWebApi\TaxLineModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\RemarketyStoreAddressSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\RemarketyWebApi\" />
@@ -332,10 +334,12 @@
   </Target>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <PropertyGroup>
+
     <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
 robocopy "$(ProjectDir)bin" "C:\Projects\Yellow\Yellow.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
 robocopy "$(ProjectDir)bin" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
 robocopy "$(ProjectDir)Views" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
+
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

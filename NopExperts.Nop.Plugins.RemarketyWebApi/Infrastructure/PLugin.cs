@@ -33,6 +33,24 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey", "Remarkety WebApi Key");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey.Hint", "Remarkety WebApi Key");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId", "Store logo");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId.Hint", "Store logo");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone", "Time zone name (e.g. Africa/Abidjan)");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone.Hint", "Time zone name (e.g. Africa/Abidjan)");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId", "Remarkety sotre ID");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId.Hint", "Remarkety sotre ID");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Country", "Country");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Country.Hint", "Country");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.State", "State");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.State.Hint", "State");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.City", "City");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.City.Hint", "City");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Address1", "Address1");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Address1.Hint", "Address1");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Address2", "Address2");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Address2.Hint", "Address2");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Zip", "Zip");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Zip.Hint", "Zip");
 
             base.Install();
         }

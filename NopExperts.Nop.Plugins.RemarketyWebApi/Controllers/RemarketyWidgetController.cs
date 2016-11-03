@@ -7,22 +7,24 @@ using System.Web.Mvc;
 using Nop.Services.Configuration;
 using Nop.Web.Controllers;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Settings;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 {
     public class RemarketyWidgetController : BasePublicController
     {
         private readonly ISettingService _settingService;
+        private readonly RemarketyApiSettings _remarketyApiSettings;
 
-        public RemarketyWidgetController(ISettingService settingService)
+        public RemarketyWidgetController(ISettingService settingService, RemarketyApiSettings remarketyApiSettings)
         {
             _settingService = settingService;
+            _remarketyApiSettings = remarketyApiSettings;
         }
 
         public ActionResult GetStoreRemarketyWebTracking()
         {
-            string storeId = _settingService.GetSettingByKey(StringHelper.RemarketyStoreIdSettingKey, String.Empty);
-            return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWidget/GetStoreRemarketyWebTracking.cshtml", model:storeId);
+            return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWidget/GetStoreRemarketyWebTracking.cshtml", model: _remarketyApiSettings.RemarketyStoreId);
         }
 
         public ActionResult GetProductDetailsRemarketyWebTracking(string additionalData)
