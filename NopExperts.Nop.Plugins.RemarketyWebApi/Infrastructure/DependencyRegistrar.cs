@@ -13,23 +13,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
     public class DependencyRegistrar : IDependencyRegistrar
     {
-        public void Register(ContainerBuilder builder, ITypeFinder typeFinder)
+        public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            //builder.RegisterType<EfRepository<NewsletterEntity>>()
-            //     .As<IRepository<NewsletterEntity>>()
-            //     .WithParameter(ResolvedParameter.ForNamed<IDbContext>(ContextName))
-            //     .InstancePerLifetimeScope();
-
             Mapper.CreateMap<ApiConfigModel, RemarketyApiSettings>();
             Mapper.CreateMap<RemarketyApiSettings, ApiConfigModel>();
 
             Mapper.CreateMap<StoreAddressModel, RemarketyStoreAddressSettings>();
             Mapper.CreateMap<RemarketyStoreAddressSettings, StoreAddressModel>();
-        }
-
-        public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
-        {
-            
         }
 
         public int Order => 0;
