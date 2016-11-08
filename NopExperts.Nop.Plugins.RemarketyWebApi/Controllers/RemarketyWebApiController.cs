@@ -549,6 +549,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Code = order.OrderStatusId.ToString()
                 };
 
+                var orderPaymentStatusModel = new OrderResponseModel.StatusModel
+                {
+                    Name = order.PaymentStatus.ToString(),
+                    Code = order.PaymentStatusId.ToString()
+                };
+
                 var shippingLinesModel = new List<ShippingLineModel>
                 {
                     PrepareShippingLineModel(order)
@@ -579,6 +585,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Note = order.OrderNotes.FirstOrDefault(x => x.DisplayToCustomer)?.Note,
                     ShippingLines = shippingLinesModel,
                     Status = orderStatusModel,
+                    FinancialStatus = orderPaymentStatusModel,
                     SubtotalPrice = order.OrderSubtotalInclTax,
                     TaxLines = taxLinesModel,
                     TaxesIncluded = true,
