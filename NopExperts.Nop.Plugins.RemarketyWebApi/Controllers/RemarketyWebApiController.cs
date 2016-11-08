@@ -139,14 +139,14 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             
             var logoPath = _pictureService.GetPictureUrl(_remarketyApiSettings.StoreLogoPictureId);
             var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
-            var orimaryStoreCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+           
 
             return new StoreSettingsResponseModel
             {
                 StoreFrontUrl = store.Url,
                 Name = store.Name,
                 Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
-                Currency = orimaryStoreCurrency.CurrencyCode ?? DEFAULT_CURRENSY,
+                Currency = GetCurrentCurrencyCode(),
                 Locale = locale?.Replace('-', '_') ?? DEFAULT_LOCALE,
                 LogoUrl = logoPath,
                 ContactInfo = new StoreSettingsResponseModel.ContactInfoModel
@@ -333,7 +333,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 CreatedAt = null,
                 ProductId = product.Id,
                 //Image = productAttributeCombination.
-                Currency = DEFAULT_CURRENSY,
+                Currency = GetCurrentCurrencyCode(),
                 FullfilmentService = null,
                 InventoryQuantity = productAttributeCombination.StockQuantity,
                 Price = productAttributeCombination.OverriddenPrice ?? product.Price,
@@ -576,7 +576,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     CreatedAt = order.CreatedOnUtc,
                     Customer = orderCustomerModel,
                     UpdatedAt = order.CreatedOnUtc,
-                    Currency = DEFAULT_CURRENSY,
+                    Currency = GetCurrentCurrencyCode(),
                     Email = order.BillingAddress.Email ?? order.ShippingAddress.Email ?? order.Customer.Email,
                     DiscountCodes = discountCodes,
                     FulfillmentStatus = null,
@@ -760,7 +760,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 CreatedAt = shoppingCartCreatedAt,
                 Id = customer.Id,
                 UpdatedAt = shoppingCartUpdatedAt,
-                Currency = DEFAULT_CURRENSY,
+                Currency = GetCurrentCurrencyCode(),
                 Email = customer.Email,
                 TaxLines = new List<TaxLineModel>(),
                 BillingAddress = billingAddress,
@@ -820,6 +820,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 VariantId = null,
                 VariantTitle = null
             };
+        }
+
+        private string GetCurrentCurrencyCode()
+        {
+            var orimaryStoreCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+
+            return orimaryStoreCurrency.CurrencyCode ?? DEFAULT_CURRENSY;
         }
 
         #endregion
