@@ -51,6 +51,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order
         [JsonProperty("status")]
         public StatusModel Status { get; set; }
 
+        [JsonProperty("financial_status")]
+        public StatusModel FinancialStatus { get; set; }
+
         [JsonProperty("subtotal_price")]
         public decimal SubtotalPrice { get; set; }
 
