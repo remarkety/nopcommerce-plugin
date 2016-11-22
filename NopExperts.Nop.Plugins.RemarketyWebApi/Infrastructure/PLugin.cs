@@ -37,6 +37,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId.Hint", "Store logo");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone", "Time zone name (e.g. Africa/Abidjan)");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone.Hint", "Time zone name (e.g. Africa/Abidjan)");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled", "Email tracking enabled");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled.Hint", "Email tracking enabled");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId", "Remarkety sotre ID");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId.Hint", "Remarkety sotre ID");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Country", "Country");

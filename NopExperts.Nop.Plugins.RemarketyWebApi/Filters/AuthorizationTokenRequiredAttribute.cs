@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -7,8 +6,9 @@ using System.Web.Http.Filters;
 using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Services.Common;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
 
-namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
+namespace NopExperts.Nop.Plugins.RemarketyWebApi.Filters
 {
     public class AuthorizationTokenRequiredAttribute : ActionFilterAttribute
     {

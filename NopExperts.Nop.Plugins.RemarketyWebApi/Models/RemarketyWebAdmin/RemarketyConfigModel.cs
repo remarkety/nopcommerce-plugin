@@ -29,6 +29,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin
         public string TimeZone { get; set; }
         [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId")]
         public string RemarketyStoreId { get; set; }
+
+        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled")]
+        public bool EmailTrackingEnabled { get; set; }
     }
 
     public class StoreAddressModel : BaseNopModel

@@ -1,18 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
-using System.Web.UI.WebControls;
-using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
@@ -22,7 +12,6 @@ using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Orders;
-using Nop.Core.Domain.Shipping;
 using Nop.Core.Domain.Tax;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
@@ -36,12 +25,10 @@ using Nop.Services.Media;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Seo;
-using Nop.Services.Shipping;
 using Nop.Services.Tax;
 using Nop.Services.Vendors;
 using Nop.Web.Framework.Themes;
-using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
-using NopExperts.Nop.Plugins.RemarketyWebApi.Models;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Filters;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Cart;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Customer;
@@ -49,7 +36,6 @@ using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Settings;
-
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 {

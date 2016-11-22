@@ -8,5 +8,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Settings
 
         public string RemarketyStoreId { get; set; }
         public int StoreLogoPictureId { get; set; }
+
+        public bool EmailTrackingEnabled { get; set; }
     }
 }

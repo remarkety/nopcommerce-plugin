@@ -95,6 +95,13 @@
                 @Html.ValidationMessageFor(m => m.ApiConfigModel.StoreLogoPictureId)
             </td>
         </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.ApiConfigModel.EmailTrackingEnabled):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.ApiConfigModel.EmailTrackingEnabled)
+                @Html.ValidationMessageFor(m => m.ApiConfigModel.EmailTrackingEnabled)
+            </td>
+        </tr>
     </table>
 }
 
