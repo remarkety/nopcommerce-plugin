@@ -65,6 +65,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IDateTimeHelper _dateTimeHelper;
         private readonly IThemeContext _themeContext;
         private readonly ILanguageService _languageService;
+        private readonly IRepository<Customer> _customersRepository;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -72,7 +73,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly CurrencySettings _currencySettings;
         private readonly RemarketyApiSettings _remarketyApiSettings;
         private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
-             
+
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
         private readonly IProductAttributeParser _productAttributeParser;
@@ -104,6 +105,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
             _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
             _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
+
+            _customersRepository = EngineContext.Current.Resolve<IRepository<Customer>>();
         }
 
         #region /store
@@ -115,17 +118,17 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var store = _storeContext.CurrentStore;
             var emailAccount = _emailAccountService.GetEmailAccountById(_emailAccountSettings.DefaultEmailAccountId);
 
-            var enumList = Enum.GetValues(typeof (OrderStatus))
+            var enumList = Enum.GetValues(typeof(OrderStatus))
                 .Cast<OrderStatus>()
                 .Select(x => new StoreSettingsResponseModel.OrderStatusModel
                 {
-                    Code = ((int) x).ToString(),
+                    Code = ((int)x).ToString(),
                     Name = x.ToString()
                 });
-            
+
             var logoPath = _pictureService.GetPictureUrl(_remarketyApiSettings.StoreLogoPictureId);
             var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
-           
+
 
             return new StoreSettingsResponseModel
             {
@@ -221,7 +224,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private ProductResponseModel PrepareProductResponseModel(Product product)
         {
-            var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new {SeName = product.GetSeName()}));
+            var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new { SeName = product.GetSeName() }));
             var productVendor = _vendorService.GetVendorById(product.VendorId);
 
             var defaultPicture = product.ProductPictures.FirstOrDefault();
@@ -423,7 +426,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 UpdatedAt = customer.CreatedOnUtc,
                 Title = String.Empty,
                 Email = customer.Email,
-                Tags = new string[] {},
+                Tags = new string[] { },
                 AcceptsMarketing = newsletterSubscription?.Active ?? false,
                 BirthDate = birthDateString,
                 DefaultAddress = defaultAddressModel,
@@ -662,8 +665,24 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
             };
 
-            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
-                pageSize: limit, loadOnlyWithShoppingCart: true);
+            //var customers = _customerService.GetAllCustomers(customerRoleIds: defaultRoles, pageIndex: page,
+            //    pageSize: limit, loadOnlyWithShoppingCart: true);
+            // .Where(x => x.LastActivityDateUtc >= (updatedAt ?? DateTime.MinValue));
+
+            var query = _customersRepository.TableNoTracking;
+
+            query = query.Where(c => !c.Deleted);
+            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
+            query = query.Where(c => c.ShoppingCartItems.Any());
+
+            if (updatedAt.HasValue)
+            {
+                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
+            }
+
+            query = query.OrderByDescending(c => c.LastActivityDateUtc);
+
+            var customers = new PagedList<Customer>(query, page, limit);
 
             return new MultipleCartResponseModel
             {
@@ -737,7 +756,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             if (orderSubTotalAppliedDiscount != null)
             {
                 discountCodes.Add(
-                    PrepareDiscountCodeModel(new DiscountUsageHistory {Discount = orderSubTotalAppliedDiscount}));
+                    PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
             }
 
             return new CartResponseModel
