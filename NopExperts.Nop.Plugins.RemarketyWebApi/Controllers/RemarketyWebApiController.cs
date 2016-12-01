@@ -725,7 +725,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var lineItemsModel = shoppingCartItems.Select(PrepareLineItemModel).ToList();
             List<DiscountCodeModel> discountCodes = new List<DiscountCodeModel>();
 
-            var cartUrl = Url.Link("RemoteCheckout",
+            var cartUrl = Url.Link("RemarketyRemoteCheckout",
                 new
                 {
                     products =

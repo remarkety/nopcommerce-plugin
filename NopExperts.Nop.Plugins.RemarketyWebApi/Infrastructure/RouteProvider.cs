@@ -13,7 +13,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
         public void RegisterRoutes(RouteCollection routes)
         {
             routes.MapMvcAttributeRoutes();
-            
+
             var route = routes.MapRoute("RemarketyWebAdmin",
                 "Admin/RemarketyWebAdmin/{action}",
                 new { controller = "RemarketyWebAdmin" },
@@ -29,7 +29,15 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
                "RemarketyWidget/{action}",
                new { controller = "RemarketyWidget" },
                new[] { "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" }
-           );
+            );
+
+
+            routes.MapRoute(
+                "RemarketyRemoteCheckout",
+                "checkout/remotecheckout",
+                new { controller = "RemarketyWidget", action = "RemoteCheckout" },
+                new[] { "NopExperts.Nop.Plugins.RemarketyWebApi.Controllers" }
+            );
         }
     }
 }
