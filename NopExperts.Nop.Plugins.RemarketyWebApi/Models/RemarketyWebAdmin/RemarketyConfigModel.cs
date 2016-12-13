@@ -24,8 +24,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin
     {
         [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.Enabled")]
         public bool Enabled { get; set; }
-        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountTemplateId")]
-        public int DiscountTemplateId { get; set; }
         [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountNamePrefix")]
         public string DiscountNamePrefix { get; set; }
     }
