@@ -660,29 +660,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         public MultipleCartResponseModel GetCarts(int page = 0, int limit = int.MaxValue,
             [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
-            var defaultRoles = new[]
-            {
-                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
-            };
-
-            //var customers = _customerService.GetAllCustomers(customerRoleIds: defaultRoles, pageIndex: page,
-            //    pageSize: limit, loadOnlyWithShoppingCart: true);
-            // .Where(x => x.LastActivityDateUtc >= (updatedAt ?? DateTime.MinValue));
-
-            var query = _customersRepository.TableNoTracking;
-
-            query = query.Where(c => !c.Deleted);
-            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
-            query = query.Where(c => c.ShoppingCartItems.Any());
-
-            if (updatedAt.HasValue)
-            {
-                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
-            }
-
-            query = query.OrderByDescending(c => c.LastActivityDateUtc);
-
-            var customers = new PagedList<Customer>(query, page, limit);
+            var customers = GetCustomers(page, limit, updatedAt);
 
             return new MultipleCartResponseModel
             {
@@ -759,6 +737,19 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
             }
 
+            // get customer email (in case of guest customer - try to get email from last shipping (billing) address)
+            var email = customer.Email;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                email = customer.ShippingAddress?.Email;
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    email = customer.BillingAddress?.Email;
+                }
+            }
+
             return new CartResponseModel
             {
                 Customer = customerResponseModel,
@@ -766,7 +757,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Id = customer.Id,
                 UpdatedAt = shoppingCartUpdatedAt,
                 Currency = GetCurrentCurrencyCode(),
-                Email = customer.Email,
+                Email = email,
                 TaxLines = new List<TaxLineModel>(),
                 BillingAddress = billingAddress,
                 ShippingAddress = shippingAddress,
@@ -835,5 +826,32 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         }
 
         #endregion
+
+        private IEnumerable<Customer> GetCustomers(int page, int limit, DateTime? updatedAt)
+        {
+            var defaultRoles = new[]
+            {
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id,
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Guests).Id
+            };
+
+            var query = _customersRepository.TableNoTracking;
+
+            query = query.Where(c => !c.Deleted);
+            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
+
+            query = query.Where(c => c.ShoppingCartItems.Any());
+
+            query = query.Where(c => !string.IsNullOrEmpty(c.Email) || !string.IsNullOrEmpty(c.ShippingAddress.Email) || !string.IsNullOrEmpty(c.BillingAddress.Email));
+
+            if (updatedAt.HasValue)
+            {
+                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
+            }
+
+            query = query.OrderByDescending(c => c.LastActivityDateUtc);
+
+            return new PagedList<Customer>(query, page, limit);
+        }
     }
 }
