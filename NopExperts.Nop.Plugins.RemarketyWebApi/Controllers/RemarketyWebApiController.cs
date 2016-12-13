@@ -403,6 +403,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private CustomerResponseModel PrepareCustomerResponseModel(Customer customer)
         {
+            // pass no customer ID for guests
+            var customerId = !customer.IsGuest() ? (int?)customer.Id : null;
             var defaultAddress = customer.ShippingAddress ?? customer.Addresses.FirstOrDefault();
             var defaultAddressModel = PrepareAddressModel(defaultAddress);
             var customerGroups = customer.CustomerRoles.Select(PrepareCustomerGroupModel).ToList();
@@ -421,7 +423,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             return new CustomerResponseModel
             {
-                Id = customer.Id,
+                Id = customerId,
                 CreatedAt = customer.CreatedOnUtc,
                 UpdatedAt = customer.CreatedOnUtc,
                 Title = String.Empty,
