@@ -16,8 +16,10 @@ using Nop.Core.Domain.Tax;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
+using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
+using Nop.Services.Discounts;
 using Nop.Services.Helpers;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
@@ -32,6 +34,7 @@ using NopExperts.Nop.Plugins.RemarketyWebApi.Filters;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Cart;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Customer;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Discounts;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store;
@@ -66,6 +69,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IThemeContext _themeContext;
         private readonly ILanguageService _languageService;
         private readonly IRepository<Customer> _customersRepository;
+        private readonly IDiscountService _discountService;
+        private readonly ISettingService _settingService;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -73,6 +78,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly CurrencySettings _currencySettings;
         private readonly RemarketyApiSettings _remarketyApiSettings;
         private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
+        private readonly RemarketyDiscountsSettings _remarketyDiscountsSettings;
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
@@ -80,6 +86,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         public RemarketyWebApiController()
         {
+            _settingService = EngineContext.Current.Resolve<ISettingService>();
             _languageService = EngineContext.Current.Resolve<ILanguageService>();
             _themeContext = EngineContext.Current.Resolve<IThemeContext>();
             _dateTimeHelper = EngineContext.Current.Resolve<IDateTimeHelper>();
@@ -95,6 +102,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _newsLetterSubscriptionService = EngineContext.Current.Resolve<INewsLetterSubscriptionService>();
             _vendorService = EngineContext.Current.Resolve<IVendorService>();
             _pictureService = EngineContext.Current.Resolve<IPictureService>();
+            _discountService = EngineContext.Current.Resolve<IDiscountService>();
             _emailAccountService = EngineContext.Current.Resolve<IEmailAccountService>();
             _emailAccountSettings = EngineContext.Current.Resolve<EmailAccountSettings>();
             _storeContext = EngineContext.Current.Resolve<IStoreContext>();
@@ -105,6 +113,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
             _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
             _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
+            _remarketyDiscountsSettings = EngineContext.Current.Resolve<RemarketyDiscountsSettings>();
 
             _customersRepository = EngineContext.Current.Resolve<IRepository<Customer>>();
         }
@@ -465,6 +474,33 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Id = role.Id,
                 Name = role.Name
             };
+        }
+
+        private IEnumerable<Customer> GetCustomers(int page, int limit, DateTime? updatedAt)
+        {
+            var defaultRoles = new[]
+            {
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id,
+                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Guests).Id
+            };
+
+            var query = _customersRepository.TableNoTracking;
+
+            query = query.Where(c => !c.Deleted);
+            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
+
+            query = query.Where(c => c.ShoppingCartItems.Any());
+
+            query = query.Where(c => !string.IsNullOrEmpty(c.Email) || !string.IsNullOrEmpty(c.ShippingAddress.Email) || !string.IsNullOrEmpty(c.BillingAddress.Email));
+
+            if (updatedAt.HasValue)
+            {
+                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
+            }
+
+            query = query.OrderByDescending(c => c.LastActivityDateUtc);
+
+            return new PagedList<Customer>(query, page, limit);
         }
 
         #endregion
@@ -829,31 +865,116 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         #endregion
 
-        private IEnumerable<Customer> GetCustomers(int page, int limit, DateTime? updatedAt)
+        #region /discounts
+
+        [HttpPost]
+        [Route("discounts")]
+        public PlaceNewDiscountResponseModel PlaceNewDiscount(string code, int templateId, DateTime? expiration = null, string email = null)
         {
-            var defaultRoles = new[]
+            if (!_remarketyDiscountsSettings.Enabled)
             {
-                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id,
-                _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Guests).Id
-            };
-
-            var query = _customersRepository.TableNoTracking;
-
-            query = query.Where(c => !c.Deleted);
-            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
-
-            query = query.Where(c => c.ShoppingCartItems.Any());
-
-            query = query.Where(c => !string.IsNullOrEmpty(c.Email) || !string.IsNullOrEmpty(c.ShippingAddress.Email) || !string.IsNullOrEmpty(c.BillingAddress.Email));
-
-            if (updatedAt.HasValue)
-            {
-                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
+                return new PlaceNewDiscountResponseModel
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Discounts disabled"
+                };
             }
 
-            query = query.OrderByDescending(c => c.LastActivityDateUtc);
+            if (string.IsNullOrEmpty(code))
+            {
+                return new PlaceNewDiscountResponseModel
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Missing discount code"
+                };
+            }
 
-            return new PagedList<Customer>(query, page, limit);
+            var templateDiscount = _discountService.GetDiscountById(templateId);
+
+            if (templateDiscount == null)
+            {
+                _logger.Error($"RemarketyWebApi (discounts/): unknown templateId ({templateId})");
+
+                return new PlaceNewDiscountResponseModel
+                {
+                    IsSuccess = false,
+                    ErrorMessage = $"Unknown template id ({templateId})"
+                };
+            }
+
+            var discount = Clone(templateDiscount, code, expiration);
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                // creating new discount requirment
+                var discountRequirement = new DiscountRequirement
+                {
+                    DiscountRequirementRuleSystemName = "NopExperts.CustomerEmailDiscountRequirement"
+                };
+
+                discount.DiscountRequirements.Add(discountRequirement);
+
+                _discountService.UpdateDiscount(discount);
+
+                // configure requrement
+                _settingService.SetSetting($"NopExperts.CustomerEmailDiscountRequirement.Settings.CustomerEmailsSettingKey-{discountRequirement.Id}", email);
+            }
+
+            return new PlaceNewDiscountResponseModel
+            {
+                IsSuccess = true
+            };
         }
+
+        #region util
+
+        private Discount Clone(Discount existingDiscount, string couponCode, DateTime? expiration)
+        {
+            var newDiscount = new Discount
+            {
+                DiscountAmount = existingDiscount.DiscountAmount,
+                DiscountLimitation = existingDiscount.DiscountLimitation,
+                DiscountLimitationId = existingDiscount.DiscountLimitationId,
+                DiscountPercentage = existingDiscount.DiscountPercentage,
+                DiscountType = existingDiscount.DiscountType,
+                DiscountTypeId = existingDiscount.DiscountTypeId,
+                LimitationTimes = existingDiscount.LimitationTimes,
+                UsePercentage = existingDiscount.UsePercentage,
+                MaximumDiscountAmount = existingDiscount.MaximumDiscountAmount,
+                MaximumDiscountedQuantity = existingDiscount.MaximumDiscountedQuantity,
+                AppliedToSubCategories = existingDiscount.AppliedToSubCategories,
+                RequiresCouponCode = true,
+                CouponCode = couponCode,
+                EndDateUtc = expiration,
+                Name = $"{_remarketyDiscountsSettings.DiscountNamePrefix}{DateTime.UtcNow.Ticks}"
+            };
+
+            _discountService.InsertDiscount(newDiscount);
+
+            foreach (var existingDiscountAppliedToCategory in existingDiscount.AppliedToCategories)
+            {
+                newDiscount.AppliedToCategories.Add(existingDiscountAppliedToCategory);
+            }
+
+            foreach (var existingDiscountAppliedToManufacturer in existingDiscount.AppliedToManufacturers)
+            {
+                newDiscount.AppliedToManufacturers.Add(existingDiscountAppliedToManufacturer);
+            }
+
+            foreach (var existingDiscountAppliedToProducts in existingDiscount.AppliedToProducts)
+            {
+                newDiscount.AppliedToProducts.Add(existingDiscountAppliedToProducts);
+            }
+
+            _discountService.UpdateDiscount(newDiscount);
+
+            // TODO: check if we can add requirments
+
+            return newDiscount;
+        }
+
+        #endregion
+
+        #endregion
     }
 }

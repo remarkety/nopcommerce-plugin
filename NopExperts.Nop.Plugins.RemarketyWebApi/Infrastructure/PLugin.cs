@@ -54,6 +54,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Zip", "Zip");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Zip.Hint", "Zip");
 
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.Enabled", "Enabled");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.Enabled.Hint", "Enable discount creation via API");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountTemplateId", "Discount template id");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountTemplateId.Hint", "Discount template id (existing base discount)");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountNamePrefix", "Generated discount name prefix");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountNamePrefix.Hint", "Generated discount name prefix");
+
             base.Install();
         }
 

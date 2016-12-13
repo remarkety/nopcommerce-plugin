@@ -36,6 +36,7 @@
             <li @Html.RenderSelectedTabIndex(0, GetSelectedTabIndex())>API Configuration</li>
             <li @Html.RenderSelectedTabIndex(1, GetSelectedTabIndex())>Store address</li>
             <li @Html.RenderSelectedTabIndex(2, GetSelectedTabIndex())>Remarkety WebAPI info</li>
+            <li @Html.RenderSelectedTabIndex(2, GetSelectedTabIndex())>Discounts</li>
         </ul>
         <div>
             @ApiConfig()
@@ -44,7 +45,15 @@
             @StoreAddressConfig()
         </div>
         <div>
-           @ApiInfo()
+            @ApiInfo()
+        </div>
+        <div>
+            <div class="note">
+                <p>
+                    Please note, that this feature requirees NopExperts.CustomerEmailDiscountRequirement plugin installed.
+                </p>
+            </div>
+            @DiscountsConfig()
         </div>
     </div>
 
@@ -59,9 +68,9 @@
     <table class="adminContent">
         <tr>
             <td colspan="2">
-                Please, contact Remarkety to get your StoreID. 
-                <br/>
-                <br/>
+                Please, contact Remarkety to get your StoreID.
+                <br />
+                <br />
                 Available TimeZone <a target="blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">list</a> (TZ* column)
             </td>
         </tr>
@@ -69,7 +78,8 @@
             <td colspan="2">
                 <br />
             </td>
-        </tr><tr>
+        </tr>
+        <tr>
             <td colspan="2">
                 <hr>
             </td>
@@ -154,6 +164,32 @@
             <td class="adminTitle">@Html.NopLabelFor(m => m.StoreAddressModel.Zip):</td>
             <td class="adminData">
                 @Html.EditorFor(m => m.StoreAddressModel.Zip)
+            </td>
+        </tr>
+    </table>
+}
+
+
+@helper DiscountsConfig()
+{
+
+    <table class="adminContent">
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.DiscountConfigModel.Enabled):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.DiscountConfigModel.Enabled)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.DiscountConfigModel.DiscountNamePrefix):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.DiscountConfigModel.DiscountNamePrefix)
+            </td>
+        </tr>
+        <tr>
+            <td class="adminTitle">@Html.NopLabelFor(m => m.DiscountConfigModel.DiscountTemplateId):</td>
+            <td class="adminData">
+                @Html.EditorFor(m => m.DiscountConfigModel.DiscountTemplateId)
             </td>
         </tr>
     </table>

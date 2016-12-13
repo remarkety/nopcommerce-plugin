@@ -272,6 +272,7 @@
     <Compile Include="Infrastructure\DependencyRegistrar.cs" />
     <Compile Include="Infrastructure\ISO8601DateTimeConverter.cs" />
     <Compile Include="Infrastructure\Plugin.cs" />
+    <Compile Include="Models\RemarketyWebApi\Discounts\PlaceNewDiscountResponseModel.cs" />
     <Compile Include="Settings\RemarketyApiSettings.cs" />
     <Compile Include="Infrastructure\RouteProvider.cs" />
     <Compile Include="Infrastructure\StringHelper.cs" />
@@ -296,6 +297,7 @@
     <Compile Include="Models\RemarketyWebApi\Store\StoreSettingsResponseModel.cs" />
     <Compile Include="Models\RemarketyWebApi\TaxLineModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\RemarketyDiscountsSettings.cs" />
     <Compile Include="Settings\RemarketyStoreAddressSettings.cs" />
   </ItemGroup>
   <ItemGroup>

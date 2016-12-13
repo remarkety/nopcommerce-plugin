@@ -22,16 +22,18 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         private RemarketyApiSettings _remarketyApiSettings;
         private RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
+        private RemarketyDiscountsSettings _remarketyDiscountsSettings;
 
         public RemarketyWebAdminController(IStoreContext storeContext, 
             RemarketyApiSettings remarketyApiSettings, 
             RemarketyStoreAddressSettings remarketyStoreAddressSettings,
-            ISettingService settingService)
+            ISettingService settingService, RemarketyDiscountsSettings remarketyDiscountsSettings)
         {
             _storeContext = storeContext;
             _remarketyApiSettings = remarketyApiSettings;
             _remarketyStoreAddressSettings = remarketyStoreAddressSettings;
             _settingService = settingService;
+            _remarketyDiscountsSettings = remarketyDiscountsSettings;
         }
 
         public ActionResult Configure()
@@ -40,8 +42,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             {
                 RemarketyWebApiKey =
                     _storeContext.CurrentStore.GetAttribute<Guid>(StringHelper.RemarketyApiKey).ToString(),
+
                 StoreAddressModel = Mapper.Map<StoreAddressModel>(_remarketyStoreAddressSettings),
-                ApiConfigModel = Mapper.Map<ApiConfigModel>(_remarketyApiSettings)
+                ApiConfigModel = Mapper.Map<ApiConfigModel>(_remarketyApiSettings),
+                DiscountConfigModel = Mapper.Map<DiscountConfigModel>(_remarketyDiscountsSettings)
             };
             
             return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/Configure.cshtml", model);
@@ -52,9 +56,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         {
             _remarketyApiSettings = Mapper.Map<RemarketyApiSettings>(model.ApiConfigModel);
             _remarketyStoreAddressSettings = Mapper.Map<RemarketyStoreAddressSettings>(model.StoreAddressModel);
+            _remarketyDiscountsSettings = Mapper.Map<RemarketyDiscountsSettings>(model.DiscountConfigModel);
 
             _settingService.SaveSetting(_remarketyApiSettings);
             _settingService.SaveSetting(_remarketyStoreAddressSettings);
+            _settingService.SaveSetting(_remarketyDiscountsSettings);
 
             return RedirectToAction("Configure");
         }

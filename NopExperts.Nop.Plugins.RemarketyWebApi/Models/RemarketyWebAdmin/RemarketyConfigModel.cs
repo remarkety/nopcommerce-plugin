@@ -17,6 +17,17 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin
 
         public StoreAddressModel StoreAddressModel { get; set; }
         public ApiConfigModel ApiConfigModel { get; set; }
+        public DiscountConfigModel DiscountConfigModel { get; set; }
+    }
+
+    public class DiscountConfigModel : BaseNopModel
+    {
+        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.Enabled")]
+        public bool Enabled { get; set; }
+        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountTemplateId")]
+        public int DiscountTemplateId { get; set; }
+        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.DiscountConfig.DiscountNamePrefix")]
+        public string DiscountNamePrefix { get; set; }
     }
 
     public class ApiConfigModel : BaseNopModel

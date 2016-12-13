@@ -24,6 +24,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
             Mapper.CreateMap<StoreAddressModel, RemarketyStoreAddressSettings>();
             Mapper.CreateMap<RemarketyStoreAddressSettings, StoreAddressModel>();
+
+            Mapper.CreateMap<DiscountConfigModel, RemarketyDiscountsSettings>();
+            Mapper.CreateMap<RemarketyDiscountsSettings, DiscountConfigModel>();
         }
 
         public int Order => 0;
