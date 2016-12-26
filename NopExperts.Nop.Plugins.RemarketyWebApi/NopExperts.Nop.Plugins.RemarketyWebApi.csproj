@@ -124,36 +124,36 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Admin, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Admin.dll</HintPath>
+    <Reference Include="Nop.Admin, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Admin.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Core, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Core.dll</HintPath>
+    <Reference Include="Nop.Core, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Data, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Data.dll</HintPath>
+    <Reference Include="Nop.Data, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Services, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Services.dll</HintPath>
+    <Reference Include="Nop.Services, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Services.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Services.XmlSerializers, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Services.XmlSerializers.dll</HintPath>
+    <Reference Include="Nop.Services.XmlSerializers, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Services.XmlSerializers.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Web, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Web.dll</HintPath>
+    <Reference Include="Nop.Web, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nop.Web.Framework, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\Nop.Web.Framework.dll</HintPath>
+    <Reference Include="Nop.Web.Framework, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\Nop.Web.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PerlRegex, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\PerlRegex.dll</HintPath>
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\PerlRegex.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Recaptcha, Version=1.0.5.0, Culture=neutral, PublicKeyToken=9afc4d65b28c38c2, processorArchitecture=MSIL">
@@ -235,7 +235,7 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="UserAgentStringLibrary, Version=1.0.1211.25, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NopCommerce.Core.3.70.1\lib\UserAgentStringLibrary.dll</HintPath>
+      <HintPath>..\packages\NopCommerce.Core.3.60.1\lib\UserAgentStringLibrary.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -338,10 +338,10 @@
   </Target>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
-robocopy "$(ProjectDir)bin" "C:\Projects\Yellow\Yellow.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
-robocopy "$(ProjectDir)bin" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
-robocopy "$(ProjectDir)Views" "C:\Projects\Yellow\Yellow.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
+    <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
+robocopy "$(ProjectDir)bin" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
+robocopy "$(ProjectDir)bin" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
+robocopy "$(ProjectDir)Views" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
 
 exit 0</PostBuildEvent>
   </PropertyGroup>

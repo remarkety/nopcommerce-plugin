@@ -15,7 +15,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
     public class DependencyRegistrar : IDependencyRegistrar
     {
-        public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
+        public void Register(ContainerBuilder builder, ITypeFinder typeFinder)
         {
             FilterProviders.Providers.Add(new FilterProvider());
 

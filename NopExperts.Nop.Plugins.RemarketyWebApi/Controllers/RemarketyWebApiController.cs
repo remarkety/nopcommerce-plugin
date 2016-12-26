@@ -942,7 +942,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 UsePercentage = existingDiscount.UsePercentage,
                 MaximumDiscountAmount = existingDiscount.MaximumDiscountAmount,
                 MaximumDiscountedQuantity = existingDiscount.MaximumDiscountedQuantity,
-                AppliedToSubCategories = existingDiscount.AppliedToSubCategories,
+              //  AppliedToSubCategories = existingDiscount.AppliedToSubCategories,
                 RequiresCouponCode = true,
                 CouponCode = couponCode,
                 EndDateUtc = expiration,
