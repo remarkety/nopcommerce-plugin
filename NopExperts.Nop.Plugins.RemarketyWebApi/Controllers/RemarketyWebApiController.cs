@@ -495,10 +495,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             if (updatedAt.HasValue)
             {
-                query = query.Where(c => c.LastActivityDateUtc >= updatedAt.Value);
+                query = query.Where(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc) >= updatedAt.Value);
             }
 
-            query = query.OrderByDescending(c => c.LastActivityDateUtc);
+            query = query.OrderByDescending(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc));
 
             return new PagedList<Customer>(query, page, limit);
         }
@@ -702,7 +702,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             return new MultipleCartResponseModel
             {
-                Carts = customers.Select(PrepareCartResponseModel).ToList()
+                Carts = customers
+                            .Select(PrepareCartResponseModel)
+                            .ToList()
             };
         }
 
