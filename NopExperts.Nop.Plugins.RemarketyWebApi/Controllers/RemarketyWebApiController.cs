@@ -71,6 +71,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IRepository<Customer> _customersRepository;
         private readonly IDiscountService _discountService;
         private readonly ISettingService _settingService;
+        private readonly IProductAttributeParser _productAttributeParser;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -82,11 +83,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
-        private readonly IProductAttributeParser _productAttributeParser;
+        private readonly IRepository<Order> _orderRepository;
 
         public RemarketyWebApiController()
         {
             _settingService = EngineContext.Current.Resolve<ISettingService>();
+            _orderRepository = EngineContext.Current.Resolve<IRepository<Order>>();
             _languageService = EngineContext.Current.Resolve<ILanguageService>();
             _themeContext = EngineContext.Current.Resolve<IThemeContext>();
             _dateTimeHelper = EngineContext.Current.Resolve<IDateTimeHelper>();
@@ -514,8 +516,18 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         public MultipleOrderResponseModel GetOrders(int page = 0, int limit = int.MaxValue,
             [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
-            var orders = _orderService
-                .SearchOrders(createdFromUtc: updatedAt, pageIndex: page, pageSize: limit)
+            //var orders = _orderService
+            //    .SearchOrders(createdFromUtc: updatedAt, pageIndex: page, pageSize: limit)
+            //    .Select(PrepareOrderResponseModel)
+            //    .OrderBy(x => x.CreatedAt)
+            //    .ToList();
+            var orderSource = _orderRepository.TableNoTracking.Where(x =>
+
+                    x.CreatedOnUtc >= updatedAt.Value
+                )
+                .OrderBy(x => x.CreatedOnUtc);
+
+            var orders =new PagedList<Order>(orderSource, page, limit)
                 .Select(PrepareOrderResponseModel)
                 .ToList();
 
