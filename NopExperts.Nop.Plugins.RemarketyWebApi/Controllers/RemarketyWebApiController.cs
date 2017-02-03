@@ -363,9 +363,23 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
             };
 
-            var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
-                pageSize: limit);
+            //var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
+            //    pageSize: limit);
 
+            var query = _customersRepository.TableNoTracking;
+
+            query = query.Where(c => !c.Deleted);
+            query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
+
+            if (updatedAt.HasValue)
+            {
+                query = query.Where(c => c.CreatedOnUtc >= updatedAt.Value);
+            }
+
+            query = query.OrderBy(c => c.CreatedOnUtc);
+
+            var customers = new PagedList<Customer>(query, page, limit);
+            
             return new MultipleCustomerResponseModel
             {
                 Customers = customers.Select(PrepareCustomerResponseModel).ToList()
