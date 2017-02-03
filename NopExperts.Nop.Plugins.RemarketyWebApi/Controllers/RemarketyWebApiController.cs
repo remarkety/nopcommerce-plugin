@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
@@ -491,16 +492,16 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             query = query.Where(c => !c.Deleted);
             query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
 
-            query = query.Where(c => c.ShoppingCartItems.Any());
+            query = query.Where(c => c.HasShoppingCartItems);
 
             query = query.Where(c => !string.IsNullOrEmpty(c.Email) || !string.IsNullOrEmpty(c.ShippingAddress.Email) || !string.IsNullOrEmpty(c.BillingAddress.Email));
 
             if (updatedAt.HasValue)
             {
-                query = query.Where(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc) >= updatedAt.Value);
+                query = query.Where(c => c.ShoppingCartItems.Max(x => x.UpdatedOnUtc) >= updatedAt.Value);
             }
 
-            query = query.OrderByDescending(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc));
+            query = query.OrderBy(c => c.ShoppingCartItems.Max(x => x.UpdatedOnUtc));
 
             return new PagedList<Customer>(query, page, limit);
         }
@@ -521,13 +522,16 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             //    .Select(PrepareOrderResponseModel)
             //    .OrderBy(x => x.CreatedAt)
             //    .ToList();
-            var orderSource = _orderRepository.TableNoTracking.Where(x =>
+            var orderSource = _orderRepository.TableNoTracking;
 
-                    x.CreatedOnUtc >= updatedAt.Value
-                )
-                .OrderBy(x => x.CreatedOnUtc);
+            if (updatedAt.HasValue)
+            {
+                orderSource = orderSource.Where(x => x.CreatedOnUtc >= updatedAt.Value);
+            }
 
-            var orders =new PagedList<Order>(orderSource, page, limit)
+            orderSource = orderSource.OrderBy(x => x.CreatedOnUtc);
+
+            var orders = new PagedList<Order>(orderSource, page, limit)
                 .Select(PrepareOrderResponseModel)
                 .ToList();
 
