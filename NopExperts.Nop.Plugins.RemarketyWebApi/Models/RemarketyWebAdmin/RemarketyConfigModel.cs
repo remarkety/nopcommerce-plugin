@@ -30,12 +30,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin
 
     public class ApiConfigModel : BaseNopModel
     {
-        [UIHint("Picture")]
-        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId")]
-        public int StoreLogoPictureId { get; set; }
-
-        [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.TimeZone")]
-        public string TimeZone { get; set; }
         [NopResourceDisplayName("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId")]
         public string RemarketyStoreId { get; set; }
 

@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Http;
 using Nop.Core;
 using Nop.Core.Data;
+using Nop.Core.Domain;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
@@ -81,6 +82,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly RemarketyApiSettings _remarketyApiSettings;
         private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
         private readonly RemarketyDiscountsSettings _remarketyDiscountsSettings;
+        private readonly StoreInformationSettings _storeInformationSettings;
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
@@ -117,6 +119,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
             _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
             _remarketyDiscountsSettings = EngineContext.Current.Resolve<RemarketyDiscountsSettings>();
+            _storeInformationSettings = EngineContext.Current.Resolve<StoreInformationSettings>();
 
             _customersRepository = EngineContext.Current.Resolve<IRepository<Customer>>();
         }
@@ -137,8 +140,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Code = ((int)x).ToString(),
                     Name = x.ToString()
                 });
+            
 
-            var logoPath = _pictureService.GetPictureUrl(_remarketyApiSettings.StoreLogoPictureId);
+            var logoPath = _pictureService.GetPictureUrl(_storeInformationSettings.LogoPictureId);
             var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
 
 
@@ -146,7 +150,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             {
                 StoreFrontUrl = store.Url,
                 Name = store.Name,
-                Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
+               // Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
                 Currency = GetCurrentCurrencyCode(),
                 Locale = locale?.Replace('-', '_') ?? DEFAULT_LOCALE,
                 LogoUrl = logoPath,
@@ -179,13 +183,18 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue,
             [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
         {
-            var products = _productRepository.TableNoTracking;
+            var query = _productRepository.TableNoTracking;
 
-            var filteredProducts = updatedAt.HasValue
-                ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
-                : products.Where(x => !x.Deleted && x.Published);
+            query = query.Where(x => !x.Deleted && x.Published);
 
-            var pagedProducts = new PagedList<Product>(filteredProducts.ToList(), page, limit);
+            if (updatedAt.HasValue)
+            {
+                query = query.Where(x => x.UpdatedOnUtc > updatedAt.Value);
+            }
+
+            query = query.OrderBy(x => x.UpdatedOnUtc);
+
+            var pagedProducts = new PagedList<Product>(query, page, limit);
 
             return new MultipleProductResponseModel
             {
@@ -771,7 +780,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             }
 
             decimal orderSubTotalDiscountAmountBase;
-            Discount orderSubTotalAppliedDiscount;
+            List<Discount> orderSubTotalAppliedDiscount;
             decimal subTotalWithoutDiscountBase;
             decimal subTotalWithDiscountBase;
             var subTotalIncludingTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax &&
@@ -801,10 +810,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 });
 
 
-            if (orderSubTotalAppliedDiscount != null)
+            if (orderSubTotalAppliedDiscount != null && orderSubTotalAppliedDiscount.Count != 0)
             {
-                discountCodes.Add(
-                    PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = orderSubTotalAppliedDiscount }));
+                foreach (var discount in orderSubTotalAppliedDiscount)
+                {
+                    discountCodes.Add(PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = discount }));
+                }
             }
 
             // get customer email (in case of guest customer - try to get email from last shipping (billing) address)
@@ -855,12 +866,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var product = shoppingCartItem.Product;
             var productVendor = _vendorService.GetVendorById(product.VendorId);
 
-            Discount scDiscount;
+            List<Discount> scDiscount;
             decimal shoppingCartItemDiscountBase;
             decimal taxRate;
             decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product,
                 _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase,
                     out scDiscount), out taxRate);
+
             decimal shoppingCartItemSubTotalWithDiscount =
                 _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase,
                     _workContext.WorkingCurrency);

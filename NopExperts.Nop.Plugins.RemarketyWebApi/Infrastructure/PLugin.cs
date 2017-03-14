@@ -31,16 +31,21 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 
             _genericAttributeService.SaveAttribute(_storeContext.CurrentStore, StringHelper.RemarketyApiKey, currentStoreApiKey);
 
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.ApiConfig", "Api configuration");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreAddress", "Store address");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.DiscountConfig", "Discount Api");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.ApiInfo", "Information");
+
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey", "Remarkety WebApi Key");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyWebApiKey.Hint", "Remarkety WebApi Key");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId", "Store logo");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.StoreLogoPictureId.Hint", "Store logo");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone", "Time zone name (e.g. Africa/Abidjan)");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.TimeZone.Hint", "Time zone name (e.g. Africa/Abidjan)");
-            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled", "Email tracking enabled");
-            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled.Hint", "Email tracking enabled");
-            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId", "Remarkety sotre ID");
-            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId.Hint", "Remarkety sotre ID");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled", "Website tracking enabled");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.EmailTrackingEnabled.Hint", "Website tracking enabled");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId", "Remarkety Store ID");
+            this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.RemarketyStoreId.Hint", "Remarkety Store ID");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Country", "Country");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.Country.Hint", "Country");
             this.AddOrUpdatePluginLocaleResource("NopExperts.RemarketyWebApi.Configure.State", "State");
@@ -75,6 +80,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
                 Visible = true,
                 ActionName = "Configure",
                 ControllerName = "RemarketyWebAdmin",
+                SystemName = "RemarketyWebApiConfig"
             };
 
 

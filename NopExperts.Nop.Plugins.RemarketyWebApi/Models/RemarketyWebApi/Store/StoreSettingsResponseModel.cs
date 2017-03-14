@@ -18,8 +18,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store
         public string Name { get; set; }
         [JsonProperty(PropertyName = "logo_url")]
         public string LogoUrl { get; set; }
-        [JsonProperty(PropertyName = "timezone")]
-        public string Timezone { get; set; }
+        //[JsonProperty(PropertyName = "timezone")]
+        //public string Timezone { get; set; }
         [JsonProperty(PropertyName = "currency")]
         public string Currency { get; set; }
         [JsonProperty(PropertyName = "locale")]

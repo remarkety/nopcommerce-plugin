@@ -4,6 +4,7 @@ using Autofac;
 using AutoMapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Nop.Admin.Infrastructure.Mapper;
 using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
@@ -18,15 +19,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
             FilterProviders.Providers.Add(new FilterProvider());
-
-            Mapper.CreateMap<ApiConfigModel, RemarketyApiSettings>();
-            Mapper.CreateMap<RemarketyApiSettings, ApiConfigModel>();
-
-            Mapper.CreateMap<StoreAddressModel, RemarketyStoreAddressSettings>();
-            Mapper.CreateMap<RemarketyStoreAddressSettings, StoreAddressModel>();
-
-            Mapper.CreateMap<DiscountConfigModel, RemarketyDiscountsSettings>();
-            Mapper.CreateMap<RemarketyDiscountsSettings, DiscountConfigModel>();
         }
 
         public int Order => 0;
