@@ -32,6 +32,7 @@ using Nop.Services.Tax;
 using Nop.Services.Vendors;
 using Nop.Web.Framework.Themes;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Filters;
+using NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Cart;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Customer;
@@ -177,9 +178,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         [HttpGet]
         [Route("products")]
         public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
             var products = _productRepository.TableNoTracking;
+
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             var filteredProducts = updatedAt.HasValue
                 ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
@@ -217,9 +220,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("products/count")]
-        public CountResponseModel ProductsConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public CountResponseModel ProductsConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
             var products = _productRepository.TableNoTracking;
+
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             var productsCount = updatedAt.HasValue
                 ? products.Count(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
@@ -356,7 +361,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         [HttpGet]
         [Route("customers")]
         public MultipleCustomerResponseModel Customers(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
             var defaultRoles = new[]
             {
@@ -371,6 +376,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             query = query.Where(c => !c.Deleted);
             query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
 
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
+
             if (updatedAt.HasValue)
             {
                 query = query.Where(c => c.CreatedOnUtc >= updatedAt.Value);
@@ -379,7 +386,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             query = query.OrderBy(c => c.CreatedOnUtc);
 
             var customers = new PagedList<Customer>(query, page, limit);
-            
+
             return new MultipleCustomerResponseModel
             {
                 Customers = customers.Select(PrepareCustomerResponseModel).ToList()
@@ -410,12 +417,14 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("customers/count")]
-        public CountResponseModel CustomersConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public CountResponseModel CustomersConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
             var defaultRoles = new[]
             {
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered).Id
             };
+
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles);
 
@@ -529,18 +538,21 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         [HttpGet]
         [Route("orders/")]
         public MultipleOrderResponseModel GetOrders(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
             //var orders = _orderService
             //    .SearchOrders(createdFromUtc: updatedAt, pageIndex: page, pageSize: limit)
             //    .Select(PrepareOrderResponseModel)
             //    .OrderBy(x => x.CreatedAt)
             //    .ToList();
+
             var orderSource = _orderRepository.TableNoTracking;
+            
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             if (updatedAt.HasValue)
             {
-                orderSource = orderSource.Where(x => x.CreatedOnUtc >= updatedAt.Value);
+                orderSource = orderSource.Where(x => x.CreatedOnUtc >= updatedAt);
             }
 
             orderSource = orderSource.OrderBy(x => x.CreatedOnUtc);
@@ -576,8 +588,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("orders/count")]
-        public CountResponseModel OrdersConut([FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+        public CountResponseModel OrdersConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
+
             var ordersCount = _orderService.SearchOrders(createdFromUtc: updatedAt).Count;
 
             return new CountResponseModel
@@ -726,8 +740,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         [HttpGet]
         [Route("carts/")]
         public MultipleCartResponseModel GetCarts(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] DateTime? updatedAt = null)
+            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
         {
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
+
             var customers = GetCustomers(page, limit, updatedAt);
 
             return new MultipleCartResponseModel
