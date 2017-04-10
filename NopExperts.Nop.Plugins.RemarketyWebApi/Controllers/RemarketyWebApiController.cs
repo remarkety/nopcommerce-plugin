@@ -72,6 +72,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IRepository<Customer> _customersRepository;
         private readonly IDiscountService _discountService;
         private readonly ISettingService _settingService;
+        private readonly IProductAttributeParser _productAttributeParser;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -83,7 +84,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         // repository (for perfomance optimization)
         private readonly IRepository<Product> _productRepository;
-        private readonly IProductAttributeParser _productAttributeParser;
+        private readonly IRepository<Order> _orderRepository;
 
         public RemarketyWebApiController()
         {
@@ -111,11 +112,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _productService = EngineContext.Current.Resolve<IProductService>();
             _orderService = EngineContext.Current.Resolve<IOrderService>();
             _customerService = EngineContext.Current.Resolve<ICustomerService>();
+
             _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
             _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
             _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
             _remarketyDiscountsSettings = EngineContext.Current.Resolve<RemarketyDiscountsSettings>();
 
+            _orderRepository = EngineContext.Current.Resolve<IRepository<Order>>();
             _customersRepository = EngineContext.Current.Resolve<IRepository<Customer>>();
         }
 
