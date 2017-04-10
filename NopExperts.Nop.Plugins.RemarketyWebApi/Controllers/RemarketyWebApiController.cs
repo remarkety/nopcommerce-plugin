@@ -188,6 +188,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             query = query.Where(x => !x.Deleted && x.Published);
 
+            var updatedAt = StringHelper.ParseDateTime(updatedAtString);
+
             if (updatedAt.HasValue)
             {
                 query = query.Where(x => x.UpdatedOnUtc > updatedAt.Value);
