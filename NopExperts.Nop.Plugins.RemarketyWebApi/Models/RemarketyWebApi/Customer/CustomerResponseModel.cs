@@ -56,6 +56,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Customer
         [JsonProperty("info")]
         public object Info { get; set; }
 
+        [JsonProperty("reward_points")]
+        public decimal RewardPoints { get; set; }
+
 
         public class GroupModel
         {

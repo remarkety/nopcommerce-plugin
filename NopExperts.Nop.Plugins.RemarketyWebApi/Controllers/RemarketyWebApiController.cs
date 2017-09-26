@@ -471,6 +471,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 Gender = customer.GetAttribute<string>(SystemCustomerAttributeNames.Gender),
                 Groups = customerGroups,
                 Info = new object(),
+                //RewardPoints = customer.RewardPointsHistory.Sum(x => x.Points),
+                RewardPoints = (decimal)(customer.RewardPointsHistory.LastOrDefault()?.PointsBalance ?? 0),
                 LastName = customer.GetAttribute<string>(SystemCustomerAttributeNames.LastName),
                 VerifiedEmail = null
             };
@@ -547,7 +549,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             //    .ToList();
 
             var orderSource = _orderRepository.TableNoTracking;
-            
+
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             if (updatedAt.HasValue)
@@ -990,7 +992,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 UsePercentage = existingDiscount.UsePercentage,
                 MaximumDiscountAmount = existingDiscount.MaximumDiscountAmount,
                 MaximumDiscountedQuantity = existingDiscount.MaximumDiscountedQuantity,
-              //  AppliedToSubCategories = existingDiscount.AppliedToSubCategories,
+                //  AppliedToSubCategories = existingDiscount.AppliedToSubCategories,
                 RequiresCouponCode = true,
                 CouponCode = couponCode,
                 EndDateUtc = expiration,
