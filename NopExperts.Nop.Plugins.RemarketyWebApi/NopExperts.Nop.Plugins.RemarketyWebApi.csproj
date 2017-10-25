@@ -55,9 +55,8 @@
       <HintPath>..\packages\Autofac.Mvc5.3.3.4\lib\net45\Autofac.Integration.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AutoMapper, Version=4.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\drugstore\drugstore\Drugstore\Drugstore.Web\bin\AutoMapper.dll</HintPath>
+    <Reference Include="AutoMapper">
+      <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -338,11 +337,10 @@
   </Target>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
-robocopy "$(ProjectDir)bin" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
-robocopy "$(ProjectDir)bin" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
-robocopy "$(ProjectDir)Views" "C:\Projects\drugstore\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn"  
-
+    <PostBuildEvent>robocopy "$(ProjectDir)\" "E:\Source\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
+robocopy "$(ProjectDir)bin" "E:\Source\drugstore\Drugstore\Drugstore.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
+robocopy "$(ProjectDir)bin" "E:\Source\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
+robocopy "$(ProjectDir)Views" "E:\Source\drugstore\Drugstore\Drugstore.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn" 
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
