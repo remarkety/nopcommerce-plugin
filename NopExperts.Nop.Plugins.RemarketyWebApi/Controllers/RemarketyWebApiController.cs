@@ -185,8 +185,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             var filteredProducts = updatedAt.HasValue
-                ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
-                : products.Where(x => !x.Deleted && x.Published);
+                ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt).OrderBy(x => x.UpdatedOnUtc)
+                : products.Where(x => !x.Deleted && x.Published).OrderBy(x => x.UpdatedOnUtc);
+           
 
             var pagedProducts = new PagedList<Product>(filteredProducts.ToList(), page, limit);
 
@@ -523,10 +524,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             if (updatedAt.HasValue)
             {
-                query = query.Where(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc) >= updatedAt.Value);
+                query = query.Where(c => c.ShoppingCartItems.Max(x => x.UpdatedOnUtc) >= updatedAt.Value);
             }
 
-            query = query.OrderByDescending(c => c.ShoppingCartItems.Min(x => x.UpdatedOnUtc));
+            query = query.OrderBy(c => c.ShoppingCartItems.Max(x => x.UpdatedOnUtc));
 
             return new PagedList<Customer>(query, page, limit);
         }
