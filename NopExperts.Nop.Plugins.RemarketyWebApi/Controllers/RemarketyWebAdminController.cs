@@ -65,7 +65,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Enabled = _remarketyDiscountsSettings.Enabled
                 },
 
-                PluginVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()
+                PluginVersion =StringHelper.GetPluginVersion()
             };
 
             return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/Configure.cshtml", model);
