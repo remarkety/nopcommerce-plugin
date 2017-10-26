@@ -45,7 +45,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
                 StoreAddressModel = Mapper.Map<StoreAddressModel>(_remarketyStoreAddressSettings),
                 ApiConfigModel = Mapper.Map<ApiConfigModel>(_remarketyApiSettings),
-                DiscountConfigModel = Mapper.Map<DiscountConfigModel>(_remarketyDiscountsSettings)
+                DiscountConfigModel = Mapper.Map<DiscountConfigModel>(_remarketyDiscountsSettings),
+                PluginVersion = StringHelper.GetPluginVersion()
             };
             
             return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/Configure.cshtml", model);
