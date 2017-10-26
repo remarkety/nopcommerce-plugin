@@ -114,6 +114,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             _productService = EngineContext.Current.Resolve<IProductService>();
             _orderService = EngineContext.Current.Resolve<IOrderService>();
             _customerService = EngineContext.Current.Resolve<ICustomerService>();
+
             _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
             _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
             _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
@@ -185,8 +186,9 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             var filteredProducts = updatedAt.HasValue
-                ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt)
-                : products.Where(x => !x.Deleted && x.Published);
+                ? products.Where(x => !x.Deleted && x.Published && x.UpdatedOnUtc >= updatedAt).OrderBy(x => x.UpdatedOnUtc)
+                : products.Where(x => !x.Deleted && x.Published).OrderBy(x => x.UpdatedOnUtc);
+           
 
             var pagedProducts = new PagedList<Product>(filteredProducts.ToList(), page, limit);
 
