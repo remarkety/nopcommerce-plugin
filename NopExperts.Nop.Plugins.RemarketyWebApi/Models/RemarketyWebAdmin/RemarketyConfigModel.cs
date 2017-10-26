@@ -18,6 +18,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin
         public StoreAddressModel StoreAddressModel { get; set; }
         public ApiConfigModel ApiConfigModel { get; set; }
         public DiscountConfigModel DiscountConfigModel { get; set; }
+        public string PluginVersion { get; set; }
     }
 
     public class DiscountConfigModel : BaseNopModel

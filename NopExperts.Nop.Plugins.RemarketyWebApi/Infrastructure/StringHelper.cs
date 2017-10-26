@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
 {
@@ -24,6 +25,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
             }
 
             return result;
+        }
+
+        public static string GetPluginVersion()
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            return $"{version.Major}.{version.Minor}.{version.Build}";
         }
     }
 }

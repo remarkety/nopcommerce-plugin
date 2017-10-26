@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using AutoMapper;
@@ -45,7 +47,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
                 StoreAddressModel = Mapper.Map<StoreAddressModel>(_remarketyStoreAddressSettings),
                 ApiConfigModel = Mapper.Map<ApiConfigModel>(_remarketyApiSettings),
-                DiscountConfigModel = Mapper.Map<DiscountConfigModel>(_remarketyDiscountsSettings)
+                DiscountConfigModel = Mapper.Map<DiscountConfigModel>(_remarketyDiscountsSettings),
+                PluginVersion = StringHelper.GetPluginVersion()
             };
             
             return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/Configure.cshtml", model);

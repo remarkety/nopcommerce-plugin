@@ -69,14 +69,14 @@
         <tr>
             <td colspan="2">
                 Please, contact Remarkety to get your StoreID.
-                <br />
-                <br />
+                <br/>
+                <br/>
                 Available TimeZone <a target="blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">list</a> (TZ* column)
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <br />
+                <br/>
             </td>
         </tr>
         <tr>
@@ -112,7 +112,18 @@
                 @Html.ValidationMessageFor(m => m.ApiConfigModel.EmailTrackingEnabled)
             </td>
         </tr>
+        <tr>
+            <td></td>
+            <td id="admin-plugin-version">Plugin Version:@Model.PluginVersion</td>
+        </tr>
     </table>
+
+    <script type="text/javascript">
+        $(function() {
+            $("#admin-plugin-version").css("text-align",
+                $("#remarkety-config").css("direction") === 'ltr' ? "right" : "left");
+        })
+    </script>
 }
 
 @helper ApiInfo()
