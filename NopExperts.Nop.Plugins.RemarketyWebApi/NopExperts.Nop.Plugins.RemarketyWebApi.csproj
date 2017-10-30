@@ -343,6 +343,13 @@
 robocopy "$(ProjectDir)bin" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
 robocopy "$(ProjectDir)bin" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
 robocopy "$(ProjectDir)Views" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn" 
+
+robocopy "$(ProjectDir)\" "C:\Projects\NopExperts.Remarkety - Versions\3.70\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
+robocopy "$(ProjectDir)bin" "C:\Projects\NopExperts.Remarkety - Versions\3.70\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
+robocopy "$(ProjectDir)Views" "C:\Projects\NopExperts.Remarkety - Versions\3.70\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn" 
+
+
+
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
