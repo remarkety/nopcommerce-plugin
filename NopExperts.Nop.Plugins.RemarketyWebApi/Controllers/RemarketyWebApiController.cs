@@ -141,7 +141,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Code = ((int)x).ToString(),
                     Name = x.ToString()
                 });
-            
+
 
             var logoPath = _pictureService.GetPictureUrl(_storeInformationSettings.LogoPictureId);
             var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
@@ -151,7 +151,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             {
                 StoreFrontUrl = store.Url,
                 Name = store.Name,
-               // Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
+                // Timezone = _remarketyApiSettings.TimeZone, //"Asia/Jerusalem",
                 Currency = GetCurrentCurrencyCode(),
                 Locale = locale?.Replace('-', '_') ?? DEFAULT_LOCALE,
                 LogoUrl = logoPath,
@@ -556,7 +556,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             //    .ToList();
 
             var orderSource = _orderRepository.TableNoTracking;
-            
+
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
             if (updatedAt.HasValue)
@@ -707,10 +707,20 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private DiscountCodeModel PrepareDiscountCodeModel(DiscountUsageHistory discountUsageHistory)
+        private DiscountCodeModel PrepareDiscountCodeModel(DiscountUsageHistory discountUsageHistoryItem)
         {
-            var discount = discountUsageHistory.Discount;
+            var discount = discountUsageHistoryItem.Discount;
 
+            return new DiscountCodeModel
+            {
+                Code = discount.Id.ToString(),
+                Type = discount.UsePercentage ? "percentage" : "fixed_amount",
+                Amount = discount.DiscountAmount
+            };
+        }
+
+        private DiscountCodeModel PrepareDiscountCodeModel(DiscountForCaching discount)
+        {
             return new DiscountCodeModel
             {
                 Code = discount.Id.ToString(),
@@ -796,9 +806,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             }
 
             decimal orderSubTotalDiscountAmountBase;
-            List<Discount> orderSubTotalAppliedDiscount;
+            List<DiscountForCaching> orderSubTotalAppliedDiscount;
             decimal subTotalWithoutDiscountBase;
             decimal subTotalWithDiscountBase;
+
             var subTotalIncludingTax = _workContext.TaxDisplayType == TaxDisplayType.IncludingTax &&
                                        !_taxSettings.ForceTaxExclusionFromOrderSubtotal;
             _orderTotalCalculationService.GetShoppingCartSubTotal(shoppingCartItems, subTotalIncludingTax,
@@ -830,7 +841,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             {
                 foreach (var discount in orderSubTotalAppliedDiscount)
                 {
-                    discountCodes.Add(PrepareDiscountCodeModel(new DiscountUsageHistory { Discount = discount }));
+                    discountCodes.Add(PrepareDiscountCodeModel(discount));
                 }
             }
 
@@ -882,12 +893,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             var product = shoppingCartItem.Product;
             var productVendor = _vendorService.GetVendorById(product.VendorId);
 
-            List<Discount> scDiscount;
+            List<DiscountForCaching> scDiscount;
             decimal shoppingCartItemDiscountBase;
             decimal taxRate;
+            int? maximumDiscountQty;
             decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product,
-                _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase,
-                    out scDiscount), out taxRate);
+                _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase,out scDiscount, out maximumDiscountQty), out taxRate);
 
             decimal shoppingCartItemSubTotalWithDiscount =
                 _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase,

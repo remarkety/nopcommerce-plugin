@@ -1,1 +1,2 @@
 26/10/2017 Versions of plugin was added
+12/02/2018 Updated to 3.90
