@@ -75,6 +75,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         private readonly IDiscountService _discountService;
         private readonly ISettingService _settingService;
         private readonly IProductAttributeParser _productAttributeParser;
+        private readonly ILocalizationService _localizationService;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
@@ -91,6 +92,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         public RemarketyWebApiController()
         {
+            _localizationService = EngineContext.Current.Resolve<ILocalizationService>();
             _settingService = EngineContext.Current.Resolve<ISettingService>();
             _orderRepository = EngineContext.Current.Resolve<IRepository<Order>>();
             _languageService = EngineContext.Current.Resolve<ILanguageService>();
@@ -977,13 +979,33 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
             if (!string.IsNullOrEmpty(email))
             {
+                var defaultGroup = discount.DiscountRequirements.FirstOrDefault(requirement => !requirement.ParentId.HasValue && requirement.IsGroup);
+                if (defaultGroup == null)
+                {
+                    defaultGroup = new DiscountRequirement
+                    {
+                        IsGroup = true,
+                        InteractionType = RequirementGroupInteractionType.And,
+                        DiscountRequirementRuleSystemName =
+                            _localizationService.GetResource(
+                                "Admin.Promotions.Discounts.Requirements.DefaultRequirementGroup")
+                    };
+
+                    //add default requirement group
+                    discount.DiscountRequirements.Add(defaultGroup);
+                }
+
                 // creating new discount requirment
                 var discountRequirement = new DiscountRequirement
                 {
-                    DiscountRequirementRuleSystemName = "NopExperts.CustomerEmailDiscountRequirement"
+                    DiscountRequirementRuleSystemName = "NopExperts.CustomerEmailDiscountRequirement",
+                    Discount = discount,
+                    DiscountId = discount.Id
                 };
+                
+                defaultGroup.ChildRequirements.Add(discountRequirement);
 
-                discount.DiscountRequirements.Add(discountRequirement);
+                //discount.DiscountRequirements.Add(discountRequirement);
 
                 _discountService.UpdateDiscount(discount);
 
