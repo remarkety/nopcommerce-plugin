@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Web;
-using System.Web.Http;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain;
@@ -15,14 +14,12 @@ using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Tax;
-using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Discounts;
-using Nop.Services.Helpers;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
@@ -42,12 +39,13 @@ using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Order;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Store;
 using NopExperts.Nop.Plugins.RemarketyWebApi.Settings;
+using Controller = Microsoft.AspNetCore.Mvc.Controller;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 {
     [AuthorizationTokenRequired]
-    [RoutePrefix("RemarketyWebApi")]
-    public class RemarketyWebApiController : ApiController
+    [Route("RemarketyWebApi")]
+    public class RemarketyWebApiController : Controller
     {
         private const string DEFAULT_CURRENSY = "USD";
         private const string DEFAULT_LOCALE = "en_US";
@@ -55,76 +53,94 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         // services
         private readonly IStoreContext _storeContext;
         private readonly IEmailAccountService _emailAccountService;
-        private readonly IProductService _productService;
-        private readonly IOrderService _orderService;
-        private readonly ICustomerService _customerService;
-        private readonly IVendorService _vendorService;
         private readonly IPictureService _pictureService;
-        private readonly ILogger _logger;
-        private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
-        private readonly IShoppingCartService _shoppingCartService;
-        private readonly IWorkContext _workContext;
+        private readonly ILanguageService _languageService;
         private readonly ICurrencyService _currencyService;
+        private readonly IVendorService _vendorService;
+        private readonly IProductService _productService;
+        private readonly ICustomerService _customerService;
+        private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
+        private readonly IOrderService _orderService;
         private readonly IOrderTotalCalculationService _orderTotalCalculationService;
         private readonly ITaxService _taxService;
         private readonly IPriceCalculationService _priceCalculationService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IThemeContext _themeContext;
-        private readonly ILanguageService _languageService;
-        private readonly IRepository<Customer> _customersRepository;
         private readonly IDiscountService _discountService;
         private readonly ISettingService _settingService;
-        private readonly IProductAttributeParser _productAttributeParser;
         private readonly ILocalizationService _localizationService;
+
+        private readonly ILogger _logger;
+
+        private readonly IProductAttributeParser _productAttributeParser;
+
+        // context
+        private readonly IWorkContext _workContext;
+        private readonly IThemeContext _themeContext;
+        
+        // helpers
+        private readonly IWebHelper _webHelper;
+
+        // repositories
+        private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Customer> _customerRepository;
+        private readonly IRepository<Order> _orderRepository;
 
         // settings
         private readonly EmailAccountSettings _emailAccountSettings;
-        private readonly TaxSettings _taxSettings;
-        private readonly CurrencySettings _currencySettings;
-        private readonly RemarketyApiSettings _remarketyApiSettings;
-        private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
-        private readonly RemarketyDiscountsSettings _remarketyDiscountsSettings;
         private readonly StoreInformationSettings _storeInformationSettings;
+        private readonly RemarketyStoreAddressSettings _remarketyStoreAddressSettings;
+        private readonly CurrencySettings _currencySettings;
+        private readonly TaxSettings _taxSettings;
+        private readonly RemarketyDiscountsSettings _remarketyDiscountsSettings;
 
-        // repository (for perfomance optimization)
-        private readonly IRepository<Product> _productRepository;
-        private readonly IRepository<Order> _orderRepository;
-
-        public RemarketyWebApiController()
+        public RemarketyWebApiController(IStoreContext storeContext,
+            IEmailAccountService emailAccountService,
+            EmailAccountSettings emailAccountSettings,
+            IPictureService pictureService,
+            StoreInformationSettings storeInformationSettings,
+            ILanguageService languageService,
+            RemarketyStoreAddressSettings remarketyStoreAddressSettings,
+            ICurrencyService currencyService,
+            CurrencySettings currencySettings,
+            IThemeContext themeContext,
+            IWebHelper webHelper,
+            IRepository<Product> productRepository,
+            IVendorService vendorService, 
+            ILogger logger, 
+            IProductService productService, 
+            ICustomerService customerService,
+            INewsLetterSubscriptionService newsLetterSubscriptionService,
+            IRepository<Customer> customerRepository, IOrderService orderService, IRepository<Order> orderRepository, IWorkContext workContext, TaxSettings taxSettings, IOrderTotalCalculationService orderTotalCalculationService, IProductAttributeParser productAttributeParser, ITaxService taxService, IPriceCalculationService priceCalculationService, RemarketyDiscountsSettings remarketyDiscountsSettings, IDiscountService discountService, ISettingService settingService, ILocalizationService localizationService)
         {
-            _localizationService = EngineContext.Current.Resolve<ILocalizationService>();
-            _settingService = EngineContext.Current.Resolve<ISettingService>();
-            _orderRepository = EngineContext.Current.Resolve<IRepository<Order>>();
-            _languageService = EngineContext.Current.Resolve<ILanguageService>();
-            _themeContext = EngineContext.Current.Resolve<IThemeContext>();
-            _dateTimeHelper = EngineContext.Current.Resolve<IDateTimeHelper>();
-            _productAttributeParser = EngineContext.Current.Resolve<IProductAttributeParser>();
-            _currencyService = EngineContext.Current.Resolve<ICurrencyService>();
-            _priceCalculationService = EngineContext.Current.Resolve<IPriceCalculationService>();
-            _taxService = EngineContext.Current.Resolve<ITaxService>();
-            _taxSettings = EngineContext.Current.Resolve<TaxSettings>();
-            _orderTotalCalculationService = EngineContext.Current.Resolve<IOrderTotalCalculationService>();
-            _shoppingCartService = EngineContext.Current.Resolve<IShoppingCartService>();
-            _workContext = EngineContext.Current.Resolve<IWorkContext>();
-            _logger = EngineContext.Current.Resolve<ILogger>();
-            _newsLetterSubscriptionService = EngineContext.Current.Resolve<INewsLetterSubscriptionService>();
-            _vendorService = EngineContext.Current.Resolve<IVendorService>();
-            _pictureService = EngineContext.Current.Resolve<IPictureService>();
-            _discountService = EngineContext.Current.Resolve<IDiscountService>();
-            _emailAccountService = EngineContext.Current.Resolve<IEmailAccountService>();
-            _emailAccountSettings = EngineContext.Current.Resolve<EmailAccountSettings>();
-            _storeContext = EngineContext.Current.Resolve<IStoreContext>();
-            _productRepository = EngineContext.Current.Resolve<IRepository<Product>>();
-            _productService = EngineContext.Current.Resolve<IProductService>();
-            _orderService = EngineContext.Current.Resolve<IOrderService>();
-            _customerService = EngineContext.Current.Resolve<ICustomerService>();
-            _currencySettings = EngineContext.Current.Resolve<CurrencySettings>();
-            _remarketyApiSettings = EngineContext.Current.Resolve<RemarketyApiSettings>();
-            _remarketyStoreAddressSettings = EngineContext.Current.Resolve<RemarketyStoreAddressSettings>();
-            _remarketyDiscountsSettings = EngineContext.Current.Resolve<RemarketyDiscountsSettings>();
-            _storeInformationSettings = EngineContext.Current.Resolve<StoreInformationSettings>();
-
-            _customersRepository = EngineContext.Current.Resolve<IRepository<Customer>>();
+            _storeContext = storeContext;
+            _emailAccountService = emailAccountService;
+            _emailAccountSettings = emailAccountSettings;
+            _pictureService = pictureService;
+            _storeInformationSettings = storeInformationSettings;
+            _languageService = languageService;
+            _remarketyStoreAddressSettings = remarketyStoreAddressSettings;
+            _currencyService = currencyService;
+            _currencySettings = currencySettings;
+            _themeContext = themeContext;
+            _webHelper = webHelper;
+            _productRepository = productRepository;
+            _vendorService = vendorService;
+            _logger = logger;
+            _productService = productService;
+            _customerService = customerService;
+            _newsLetterSubscriptionService = newsLetterSubscriptionService;
+            _customerRepository = customerRepository;
+            _orderService = orderService;
+            _orderRepository = orderRepository;
+            _workContext = workContext;
+            _taxSettings = taxSettings;
+            _orderTotalCalculationService = orderTotalCalculationService;
+            _productAttributeParser = productAttributeParser;
+            _taxService = taxService;
+            _priceCalculationService = priceCalculationService;
+            _remarketyDiscountsSettings = remarketyDiscountsSettings;
+            _discountService = discountService;
+            _settingService = settingService;
+            _localizationService = localizationService;
         }
 
         #region /store
@@ -144,10 +160,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Name = x.ToString()
                 });
 
+            // if logo not set in store settings - take default nop logo
+            var logoPath = _storeInformationSettings.LogoPictureId > 0 ? _pictureService.GetPictureUrl(_storeInformationSettings.LogoPictureId) : $"{_webHelper.GetStoreLocation()}Themes/{_themeContext.WorkingThemeName}/Content/images/logo.png";
 
-            var logoPath = _pictureService.GetPictureUrl(_storeInformationSettings.LogoPictureId);
             var locale = _languageService.GetAllLanguages(storeId: store.Id).FirstOrDefault()?.LanguageCulture;
-
 
             return new StoreSettingsResponseModel
             {
@@ -176,21 +192,31 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
+        private string GetCurrentCurrencyCode()
+        {
+            var orimaryStoreCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
+
+            return orimaryStoreCurrency.CurrencyCode ?? DEFAULT_CURRENSY;
+        }
+
         #endregion
 
         #region /products
 
-
         [HttpGet]
         [Route("products")]
         public MultipleProductResponseModel Products(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
+            [FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
+            _logger.Information($"RemarketyWebApi (products): updatedAtString = {updatedAtString}");
+
             var query = _productRepository.TableNoTracking;
 
             query = query.Where(x => !x.Deleted && x.Published);
 
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
+
+            _logger.Information($"RemarketyWebApi (products): updatedAt = {updatedAt}");
 
             if (updatedAt.HasValue)
             {
@@ -231,7 +257,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("products/count")]
-        public CountResponseModel ProductsConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
+        public CountResponseModel ProductsConut([FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             var products = _productRepository.TableNoTracking;
 
@@ -248,11 +274,12 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         }
 
 
-        #region util methods
+        #region utils
+
 
         private ProductResponseModel PrepareProductResponseModel(Product product)
         {
-            var productUrl = HttpUtility.UrlDecode(Url.Link("Product", new { SeName = product.GetSeName() }));
+            var productUrl = WebUtility.UrlDecode(Url.Link("Product", new { SeName = product.GetSeName() }));
             var productVendor = _vendorService.GetVendorById(product.VendorId);
 
             var defaultPicture = product.ProductPictures.FirstOrDefault();
@@ -305,28 +332,6 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private ProductResponseModel.ProductCategoryModel PrepareProductCategoryModel(ProductCategory productCategory)
-        {
-            return new ProductResponseModel.ProductCategoryModel
-            {
-                Code = productCategory.CategoryId,
-                Name = productCategory.Category?.Name
-            };
-        }
-
-        private ProductResponseModel.OptionModel PrepareProductOptionsModel(
-            ProductAttributeMapping productAttributeMapping)
-        {
-            var values = productAttributeMapping.ProductAttributeValues.Select(x => x.Name).ToArray();
-
-            return new ProductResponseModel.OptionModel
-            {
-                Id = productAttributeMapping.ProductAttribute.Id,
-                Name = productAttributeMapping.ProductAttribute.Name,
-                Values = values
-            };
-        }
-
         private ProductResponseModel.ImageModel PrepareProductImageModel(ProductPicture productPicture)
         {
             return new ProductResponseModel.ImageModel
@@ -363,6 +368,29 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
+
+        private ProductResponseModel.ProductCategoryModel PrepareProductCategoryModel(ProductCategory productCategory)
+        {
+            return new ProductResponseModel.ProductCategoryModel
+            {
+                Code = productCategory.CategoryId,
+                Name = productCategory.Category?.Name
+            };
+        }
+
+        private ProductResponseModel.OptionModel PrepareProductOptionsModel(
+            ProductAttributeMapping productAttributeMapping)
+        {
+            var values = productAttributeMapping.ProductAttributeValues.Select(x => x.Name).ToArray();
+
+            return new ProductResponseModel.OptionModel
+            {
+                Id = productAttributeMapping.ProductAttribute.Id,
+                Name = productAttributeMapping.ProductAttribute.Name,
+                Values = values
+            };
+        }
+
         #endregion
 
         #endregion
@@ -372,7 +400,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
         [HttpGet]
         [Route("customers")]
         public MultipleCustomerResponseModel Customers(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
+            [FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             var defaultRoles = new[]
             {
@@ -382,7 +410,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             //var customers = _customerService.GetAllCustomers(updatedAt, customerRoleIds: defaultRoles, pageIndex: page,
             //    pageSize: limit);
 
-            var query = _customersRepository.TableNoTracking;
+            var query = _customerRepository.TableNoTracking;
 
             query = query.Where(c => !c.Deleted);
             query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
@@ -428,7 +456,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("customers/count")]
-        public CountResponseModel CustomersConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
+        public CountResponseModel CustomersConut([FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             var defaultRoles = new[]
             {
@@ -521,7 +549,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Guests).Id
             };
 
-            var query = _customersRepository.TableNoTracking;
+            var query = _customerRepository.TableNoTracking;
 
             query = query.Where(c => !c.Deleted);
             query = query.Where(c => c.CustomerRoles.Select(cr => cr.Id).Intersect(defaultRoles).Any());
@@ -544,12 +572,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         #endregion
 
+
         #region /orders
 
         [HttpGet]
         [Route("orders/")]
         public MultipleOrderResponseModel GetOrders(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
+            [FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             //var orders = _orderService
             //    .SearchOrders(createdFromUtc: updatedAt, pageIndex: page, pageSize: limit)
@@ -599,7 +628,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         [HttpGet]
         [Route("orders/count")]
-        public CountResponseModel OrdersConut([FromUri(Name = "updated_at_min")] string updatedAtString = null)
+        public CountResponseModel OrdersConut([FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
@@ -756,12 +785,13 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 
         #endregion
 
+
         #region /carts
 
         [HttpGet]
         [Route("carts/")]
         public MultipleCartResponseModel GetCarts(int page = 0, int limit = int.MaxValue,
-            [FromUri(Name = "updated_at_min")] string updatedAtString = null)
+            [FromQuery(Name = "updated_at_min")] string updatedAtString = null)
         {
             var updatedAt = StringHelper.ParseDateTime(updatedAtString);
 
@@ -900,7 +930,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             decimal taxRate;
             int? maximumDiscountQty;
             decimal shoppingCartItemSubTotalWithDiscountBase = _taxService.GetProductPrice(product,
-                _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase,out scDiscount, out maximumDiscountQty), out taxRate);
+                _priceCalculationService.GetSubTotal(shoppingCartItem, true, out shoppingCartItemDiscountBase, out scDiscount, out maximumDiscountQty), out taxRate);
 
             decimal shoppingCartItemSubTotalWithDiscount =
                 _currencyService.ConvertFromPrimaryStoreCurrency(shoppingCartItemSubTotalWithDiscountBase,
@@ -929,14 +959,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             };
         }
 
-        private string GetCurrentCurrencyCode()
-        {
-            var orimaryStoreCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
-
-            return orimaryStoreCurrency.CurrencyCode ?? DEFAULT_CURRENSY;
-        }
-
         #endregion
+
 
         #region /discounts
 
@@ -1002,7 +1026,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                     Discount = discount,
                     DiscountId = discount.Id
                 };
-                
+
                 defaultGroup.ChildRequirements.Add(discountRequirement);
 
                 //discount.DiscountRequirements.Add(discountRequirement);

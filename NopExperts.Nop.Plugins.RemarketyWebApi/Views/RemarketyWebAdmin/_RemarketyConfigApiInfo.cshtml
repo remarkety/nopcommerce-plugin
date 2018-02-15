@@ -1,0 +1,34 @@
+﻿@model NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin.RemarketyConfigModel
+    <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>
+                        Your Remarkety API Key is: <strong>@Model.RemarketyWebApiKey</strong>
+                        <br />
+                        Please <a href="https://support.remarkety.com/hc/en-us/articles/212951706-Setting-up-nopCommerce" target="blank">click here</a> for installation instructions.
+                    </p>
+
+                    <hr />
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <nop-label asp-for="ApiConfigModel.RemarketyStoreId" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="ApiConfigModel.RemarketyStoreId" />
+                                <span asp-validation-for="ApiConfigModel.RemarketyStoreId"></span>
+                            </div>
+                    </div>     
+                    <div class="form-group">
+                            <div class="col-md-3">
+                                <nop-label asp-for="ApiConfigModel.EmailTrackingEnabled" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="ApiConfigModel.EmailTrackingEnabled" />
+                                <span asp-validation-for="ApiConfigModel.EmailTrackingEnabled"></span>
+                            </div>
+                        </div>
+                    <p class="text-right">Plugin Version: @Model.PluginVersion</p>
+                </div>
+            </div>
+
+    </div>

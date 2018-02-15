@@ -1,8 +1,0 @@
-﻿Group: NopExperts
-FriendlyName: Remarkety WebApi Plugin
-SystemName: NopExperts.RemarketyWebApi
-Version: 1.0
-SupportedVersions: 3.90
-Author: www.nopexperts.com
-DisplayOrder: 1
-FileName: NopExperts.Nop.Plugins.RemarketyWebApi.dll

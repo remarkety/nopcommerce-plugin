@@ -1,57 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Services.Catalog;
-using Nop.Services.Configuration;
 using Nop.Services.Logging;
 using Nop.Services.Orders;
-using Nop.Web.Controllers;
-using NopExperts.Nop.Plugins.RemarketyWebApi.Settings;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
 {
-    public class RemarketyWidgetController : BasePublicController
+    public class RemoteCheckoutController : Controller
     {
-        private readonly ISettingService _settingService;
-        private readonly RemarketyApiSettings _remarketyApiSettings;
-        private readonly IProductService _productService;
         private readonly ILogger _logger;
+        private readonly IProductService _productService;
         private readonly IWorkContext _workContext;
-        private readonly IStoreContext _storeContext;
         private readonly IShoppingCartService _shoppingCartService;
+        private readonly IStoreContext _storeContext;
 
-        public RemarketyWidgetController(ISettingService settingService,
-            RemarketyApiSettings remarketyApiSettings, IProductService productService, 
-            ILogger logger, IWorkContext workContext, IStoreContext storeContext, 
-            IShoppingCartService shoppingCartService)
+        public RemoteCheckoutController(ILogger logger, 
+            IProductService productService, 
+            IWorkContext workContext, 
+            IShoppingCartService shoppingCartService, 
+            IStoreContext storeContext)
         {
-            _settingService = settingService;
-            _remarketyApiSettings = remarketyApiSettings;
-            _productService = productService;
             _logger = logger;
+            _productService = productService;
             _workContext = workContext;
-            _storeContext = storeContext;
             _shoppingCartService = shoppingCartService;
+            _storeContext = storeContext;
         }
 
-        public ActionResult GetStoreRemarketyWebTracking()
-        {
-            return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWidget/GetStoreRemarketyWebTracking.cshtml", model: _remarketyApiSettings.RemarketyStoreId);
-        }
-
-        public ActionResult GetProductDetailsRemarketyWebTracking(string additionalData)
-        {
-            return View("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWidget/GetProductDetailsRemarketyWebTracking.cshtml",model: additionalData);
-        }
-
+        [Route("checkout/remotecheckout")]
         public ActionResult RemoteCheckout(string products)
         {
+            if (string.IsNullOrEmpty(products))
+            {
+                return Redirect("/cart");
+            }
+
             var skuList = products.Split(',');
 
             foreach (var sku in skuList)

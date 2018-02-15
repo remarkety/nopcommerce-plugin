@@ -16,10 +16,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Infrastructure
                 return null;
             }
 
-            DateTime result;
-
             if (!DateTime.TryParseExact(dateTimeString, "yyyy-MM-ddTHH:mm:ss+0000", CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeLocal, out result))
+                DateTimeStyles.AssumeLocal, out var result))
             {
                 return null;
             }

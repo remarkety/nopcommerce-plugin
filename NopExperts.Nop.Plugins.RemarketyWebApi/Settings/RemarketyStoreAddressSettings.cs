@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Nop.Core.Configuration;
+﻿using Nop.Core.Configuration;
 
 namespace NopExperts.Nop.Plugins.RemarketyWebApi.Settings
 {

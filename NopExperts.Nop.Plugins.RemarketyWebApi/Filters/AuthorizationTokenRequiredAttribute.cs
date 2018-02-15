@@ -1,8 +1,6 @@
 ﻿using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Services.Common;
@@ -14,10 +12,10 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Filters
     {
         const string AUTH_TOKEN_KEY = "remarkety_api_key";
 
-        public override void OnActionExecuting(HttpActionContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var queryParameters = filterContext.Request.GetQueryNameValuePairs().ToDictionary(x => x.Key, x => x.Value);
-
+            var queryParameters = context.HttpContext.Request.Query.ToDictionary(x => x.Key, x => x.Value);
+            
             string authTokenValue = string.Empty;
 
             if (queryParameters.ContainsKey(AUTH_TOKEN_KEY))
@@ -30,11 +28,11 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Filters
 
             if (authTokenValue != token)
             {
-                var responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "Invalid Request" };
-                filterContext.Response = responseMessage;
+               // var responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized) { ReasonPhrase = "Invalid Request" };
+                context.Result = new UnauthorizedResult();
             }
 
-            base.OnActionExecuting(filterContext);
+            base.OnActionExecuting(context);
         }
     }
 }

@@ -1,21 +1,15 @@
 ﻿@model NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebAdmin.RemarketyConfigModel
 
 @{
-    Layout = "_AdminLayout.cshtml";
+    Layout = "_AdminLayout";
     ViewBag.Title = "Remarkety WebAPI plugin";
 
     Html.SetActiveMenuItemSystemName("RemarketyWebApiConfig");
 }
 
-<script>
-    $(document).ready(function () {
-        bindBootstrapTabSelectEvent('remarkety-config');
-    });
-</script>
+<form asp-controller="RemarketyWebAdmin" asp-action="Configure" method="post" id="remarkety-config-form">
+    <input type="hidden" name="test" value="test"/>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
     <div class="content-header clearfix">
         <h1 class="pull-left">
             @ViewBag.Title
@@ -27,183 +21,13 @@
             </button>
         </div>
     </div>
-
     <div class="content">
         <div class="form-horizontal">
-            <div id="remarkety-config" class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
-                    @Html.RenderBootstrapTabHeader("tab-api-config", @T("NopExperts.RemarketyWebApi.Configure.ApiConfig"), true)
-                    @Html.RenderBootstrapTabHeader("tab-store-address", @T("NopExperts.RemarketyWebApi.Configure.StoreAddress"), false)
-                    @Html.RenderBootstrapTabHeader("tab-discount-config", @T("NopExperts.RemarketyWebApi.Configure.DiscountConfig"), false)
-                </ul>
-                <div class="tab-content">
-                    @Html.RenderBootstrapTabContent("tab-api-config", @ApiConfig(), true)
-                    @Html.RenderBootstrapTabContent("tab-store-address", @StoreAddressConfig())
-                    @Html.RenderBootstrapTabContent("tab-discount-config", @DiscountsConfig())
-                </div>
-            </div>
+            <nop-tabs id="remarkety-config-edit">
+                <nop-tab asp-name="tab-api-config" asp-title="@T("NopExperts.RemarketyWebApi.Configure.ApiConfig")" asp-default="true">@await Html.PartialAsync("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/_RemarketyConfigApiInfo.cshtml", Model)</nop-tab>
+                <nop-tab asp-name="tab-store-address" asp-title="@T("NopExperts.RemarketyWebApi.Configure.StoreAddress")" asp-default="false">@await Html.PartialAsync("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/_RemarketyConfigStoreAddress.cshtml", Model)</nop-tab>
+                <nop-tab asp-name="tab-discount-config" asp-title="@T("NopExperts.RemarketyWebApi.Configure.DiscountConfig")" asp-default="false">@await Html.PartialAsync("~/Plugins/NopExperts.RemarketyWebApi/Views/RemarketyWebAdmin/_RemarketyConfigDiscount.cshtml", Model)</nop-tab>
+            </nop-tabs>
         </div>
     </div>
-
-    @*save selected tab name*@
-    <input type="hidden" id="selected-tab-name" name="selected-tab-name" value="@(Html.GetSelectedTabName())">
-}
-
-@helper ApiConfig()
-{
-    <div class="panel-group">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <p>
-                        Your Remarkety API Key is: <strong>@Model.RemarketyWebApiKey</strong>
-                        <br/>
-                        Please <a href="https://support.remarkety.com/hc/en-us/articles/212951706-Setting-up-nopCommerce" target="blank">click here</a> for installation instructions.
-                    </p>
-
-                    <hr/>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.ApiConfigModel.RemarketyStoreId)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.ApiConfigModel.RemarketyStoreId)
-                                @Html.ValidationMessageFor(model => model.ApiConfigModel.RemarketyStoreId)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.ApiConfigModel.EmailTrackingEnabled)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.ApiConfigModel.EmailTrackingEnabled)
-                                @Html.ValidationMessageFor(model => model.ApiConfigModel.EmailTrackingEnabled)
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-right">Plugin Version: @Model.PluginVersion</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-}
-
-@helper StoreAddressConfig()
-{
-    <div class="panel-group">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.Country)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.Country)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.Country)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.State)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.State)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.State)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.City)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.City)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.City)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.Address1)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.Address1)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.Address1)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.Address2)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.Address2)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.Address2)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.StoreAddressModel.Zip)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.StoreAddressModel.Zip)
-                                @Html.ValidationMessageFor(model => model.StoreAddressModel.Zip)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-
-@helper DiscountsConfig()
-{
-    <div class="panel-group">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <p>
-                        Please note, that this feature requirees NopExperts.CustomerEmailDiscountRequirement plugin installed.
-                    </p>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.DiscountConfigModel.Enabled)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.DiscountConfigModel.Enabled)
-                                @Html.ValidationMessageFor(model => model.DiscountConfigModel.Enabled)
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <div class="col-md-3">
-                                @Html.NopLabelFor(model => model.DiscountConfigModel.DiscountNamePrefix)
-                            </div>
-                            <div class="col-md-9">
-                                @Html.NopEditorFor(model => model.DiscountConfigModel.DiscountNamePrefix)
-                                @Html.ValidationMessageFor(model => model.DiscountConfigModel.DiscountNamePrefix)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+</form>

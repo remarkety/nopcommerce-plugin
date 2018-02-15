@@ -1,0 +1,11 @@
+﻿{
+  "Group": "NopExperts",
+  "FriendlyName": "Remarkety WebApi Plugin",
+  "SystemName": "NopExperts.RemarketyWebApi",
+  "Version": "2.0",
+  "SupportedVersions": [ "4.00" ],
+  "Author": "www.nopexperts.com",
+  "DisplayOrder": 1,
+  "FileName": "NopExperts.Nop.Plugins.RemarketyWebApi.dll",
+  "Description": "Provides WebApi for Remarkety"
+}
