@@ -131,8 +131,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Models.RemarketyWebApi.Product
             [JsonProperty(PropertyName = "image")]
             public string Image { get; set; }
 
-            [JsonProperty(PropertyName = "inventory_quantity")]
-            public int InventoryQuantity { get; set; }
+            [JsonProperty(PropertyName = "inventory_quantity", NullValueHandling = NullValueHandling.Ignore)]
+            public int? InventoryQuantity { get; set; }
 
             [JsonProperty(PropertyName = "price")]
             public decimal Price { get; set; }
