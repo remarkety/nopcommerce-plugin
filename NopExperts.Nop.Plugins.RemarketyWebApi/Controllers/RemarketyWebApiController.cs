@@ -303,11 +303,16 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             }
             else
             {
+                // int.MinValue is reserved for products which have no stock tracking
+                int productStockQty = product.ManageInventoryMethod == ManageInventoryMethod.ManageStock
+                    ? product.StockQuantity
+                    : int.MinValue;
+
                 productVariants.Add(PrepareProductVariantModel(new ProductAttributeCombination
                 {
                     Product = product,
                     Sku = product.Sku,
-                    StockQuantity = product.StockQuantity
+                    StockQuantity = productStockQty
                 }));
             }
 
@@ -357,7 +362,8 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 //Image = productAttributeCombination.
                 Currency = GetCurrentCurrencyCode(),
                 FullfilmentService = null,
-                InventoryQuantity = productAttributeCombination.StockQuantity,
+                // if stockQty not equal to int.Min - we need to track stock
+                InventoryQuantity = productAttributeCombination.StockQuantity != int.MinValue ? (int?)productAttributeCombination.StockQuantity : null,
                 Price = productAttributeCombination.OverriddenPrice ?? product.Price,
                 RequiresShipping = product.IsShipEnabled,
                 Sku = productAttributeCombination.Sku,
