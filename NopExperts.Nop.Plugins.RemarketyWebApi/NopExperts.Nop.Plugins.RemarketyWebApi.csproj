@@ -339,10 +339,10 @@
   </Target>
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy "$(ProjectDir)\" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
-robocopy "$(ProjectDir)bin" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
-robocopy "$(ProjectDir)bin" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
-robocopy "$(ProjectDir)Views" "E:\Source\nop_Commerce_3.70_Source\nopCommerce_3.70_Source\Presentation\Nop.Web\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn" 
+    <PostBuildEvent>robocopy "$(ProjectDir)\" "C:\Projects\nopCommerce_3.70_NoSource\Plugins\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
+robocopy "$(ProjectDir)bin" "C:\Projects\nopCommerce_3.70_NoSource\bin" "$(TargetFileName)"  /E /XO /XD ".svn"  
+robocopy "$(ProjectDir)bin" "C:\Projects\nopCommerce_3.70_NoSource\Plugins\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
+robocopy "$(ProjectDir)Views" "C:\Projects\nopCommerce_3.70_NoSource\Plugins\NopExperts.RemarketyWebApi\Views" "*.*"  /E /XO /XD /PURGE ".svn" 
 
 robocopy "$(ProjectDir)\" "C:\Projects\NopExperts.Remarkety - Versions\3.70\NopExperts.RemarketyWebApi"  "*.txt*" "*.jpg"  /PURGE 
 robocopy "$(ProjectDir)bin" "C:\Projects\NopExperts.Remarkety - Versions\3.70\NopExperts.RemarketyWebApi"  "$(TargetFileName)" "Autofac.Integration.WebApi.dll"  /E /XO /XD  /PURGE ".svn"  
