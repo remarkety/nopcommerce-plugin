@@ -266,11 +266,15 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
             }
             else
             {
+                var productQty = product.ManageInventoryMethod != ManageInventoryMethod.ManageStock
+                    ? int.MinValue
+                    : product.StockQuantity;
+
                 productVariants.Add(PrepareProductVariantModel(new ProductAttributeCombination
                 {
                     Product = product,
                     Sku = product.Sku,
-                    StockQuantity = product.StockQuantity
+                    StockQuantity = productQty
                 }));
             }
 
@@ -342,7 +346,7 @@ namespace NopExperts.Nop.Plugins.RemarketyWebApi.Controllers
                 //Image = productAttributeCombination.
                 Currency = GetCurrentCurrencyCode(),
                 FullfilmentService = null,
-                InventoryQuantity = productAttributeCombination.StockQuantity,
+                InventoryQuantity = productAttributeCombination.StockQuantity == int.MinValue ? null : (int?)productAttributeCombination.StockQuantity,
                 Price = productAttributeCombination.OverriddenPrice ?? product.Price,
                 RequiresShipping = product.IsShipEnabled,
                 Sku = productAttributeCombination.Sku,
